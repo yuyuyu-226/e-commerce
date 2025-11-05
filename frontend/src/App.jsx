@@ -1,38 +1,44 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+// src/App.jsx
 
-function App() {
-  const [count, setCount] = useState(0);
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 
+// Components
+import NavBar from './components/NavBar.jsx';
+
+// Pages
+import Home from './pages/Home.jsx';
+import Products from './pages/Products.jsx';
+import Contact from './pages/Contact.jsx';
+import About from './pages/About.jsx';
+import SignUp from './pages/SignUp.jsx';
+
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <div className="text-3xl font-bold text-red-600">
-        Hello, Tailwind CSS!
-      </div>
-    </>
+    <div>
+      {/* The NavBar stays here because it should be visible on all pages */}
+      <NavBar />
+
+      {/* Routes defines the area where page content will change.
+        The Route components map a URL path to a specific Page component.
+      */}
+      <main>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/signup" element={<SignUp />} />
+          
+          {/* You might want a route for the sign-up form */}
+          {/* <Route path="/signup" element={<SignUpForm />} /> */}
+          
+          {/* Optional: Add a 404 Not Found route */}
+          {/* <Route path="*" element={<h1>404 Not Found</h1>} /> */}
+        </Routes>
+      </main>
+    </div>
   );
-}
+};
 
 export default App;
