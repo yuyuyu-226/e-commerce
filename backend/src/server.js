@@ -23,7 +23,6 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-import authRoutes from "./routes/auth.js";
 app.use("/auth", authRoutes);
 
 //Server

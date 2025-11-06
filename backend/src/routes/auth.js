@@ -4,7 +4,15 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 // Mock user data store (temporary for Sprint 2)
-const users = [];
+const users = [
+  {
+    id: "1234567890",
+    username: "demoUser",
+    email: "demo@example.com",
+    password: "password123",
+    role: "buyer",
+  },
+];
 
 // /signup route
 router.post("/signup", (req, res) => {
@@ -22,13 +30,19 @@ router.post("/signup", (req, res) => {
   }
 
   // Mock “save” to fake database
-  const newUser = { id: users.length + 1, username, email };
+  const newUser = {
+    id: users.length + 1,
+    username,
+    email,
+    password,
+    role: "buyer",
+  };
   users.push(newUser);
 
   // Generate mock JWT (valid for 1 hour)
   const token = jwt.sign(
     { id: newUser.id, username: newUser.username },
-    process.env.JWT_SECRET || "mock_secret",
+    process.env.JWT_SECRET || "mocksecret",
     { expiresIn: "1h" }
   );
 
@@ -36,6 +50,40 @@ router.post("/signup", (req, res) => {
   res.status(201).json({
     message: "Signup successful",
     user: newUser,
+    token,
+  });
+});
+
+// POST /auth/login (mock)
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  // Basic validation
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  // Check against mock credentials
+  if (email !== users.email || password !== users.password) {
+    return res.status(400).json({ message: "Invalid email or password" });
+  }
+
+  // Create a mock JWT token (valid for 1 hour)
+  const token = jwt.sign(
+    { id: users.id, username: users.username, role: users.role },
+    process.env.JWT_SECRET || "mocksecret",
+    { expiresIn: "1h" }
+  );
+
+  // Send mock response
+  res.status(200).json({
+    message: "Login successful",
+    user: {
+      id: users.id,
+      username: users.username,
+      email: users.email,
+      role: users.role,
+    },
     token,
   });
 });
