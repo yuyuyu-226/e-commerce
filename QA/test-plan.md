@@ -65,8 +65,8 @@ The goal is to ensure that all core functionalities, user flows, and integration
 
 ## 6. Test Deliverables
 
-- `test-cases.md` – Detailed test case list  
-- `test-results.md` – Execution outcomes and status  
+- `test-cases` – Detailed test case list inside the folder 
+- `XXX-test.md` – Execution outcomes and status of scpecific test cases
 - `bug-report.md` – List of identified defects and severity  
 - `test-summary.md` – Summary of testing activities and conclusions  
 
