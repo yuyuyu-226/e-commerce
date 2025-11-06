@@ -12,6 +12,7 @@ import Products from './pages/Products.jsx';
 import Contact from './pages/Contact.jsx';
 import About from './pages/About.jsx';
 import SignUp from './pages/SignUp.jsx';
+import Login from './pages/Login.jsx';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
           
           {/* You might want a route for the sign-up form */}
           {/* <Route path="/signup" element={<SignUpForm />} /> */}
