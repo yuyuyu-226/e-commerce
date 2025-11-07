@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Lock, CheckCircle, AlertTriangle, Loader } from 'lucide-react';
-import { Link } from 'react-router-dom'; // Assuming routing is set up
+import { User, Mail, Lock, CheckCircle, AlertTriangle, Loader, UserPlus } from 'lucide-react';
+// REMOVED: import { Link, useNavigate } from 'react-router-dom'; 
 
 // Basic email format validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -11,6 +11,8 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 const SignUpForm = () => {
   // State for form data
   const [formData, setFormData] = useState({
+    firstName: '', 
+    lastName: '', 
     username: '',
     email: '',
     password: '',
@@ -43,7 +45,7 @@ const SignUpForm = () => {
     }
     // Clear submission message when user starts typing again
     if (submitMessage) {
-        setSubmitMessage('');
+      setSubmitMessage('');
     }
   };
 
@@ -51,7 +53,15 @@ const SignUpForm = () => {
   const validate = (data) => {
     let newErrors = {};
 
-    // 1. Required Fields
+    // 1. New Required Fields (Matching Backend first_name/last_name fields)
+    if (!data.firstName.trim()) {
+      newErrors.firstName = 'First Name is required.';
+    }
+    if (!data.lastName.trim()) {
+      newErrors.lastName = 'Last Name is required.';
+    }
+
+    // 2. Existing Required Fields
     if (!data.username.trim()) {
       newErrors.username = 'Username is required.';
     } else if (data.username.trim().length < 3) {
@@ -67,17 +77,17 @@ const SignUpForm = () => {
       newErrors.confirmPassword = 'Confirm Password is required.';
     }
 
-    // 2. Email Format
+    // 3. Email Format
     if (data.email.trim() && !EMAIL_REGEX.test(data.email)) {
       newErrors.email = 'Invalid email format.';
     }
 
-    // 3. Password Strength
+    // 4. Password Strength
     if (data.password && !PASSWORD_REGEX.test(data.password)) {
       newErrors.password = 'Password must be at least 8 characters, and include at least one uppercase letter, one lowercase letter, and one number.';
     }
 
-    // 4. Password Match
+    // 5. Password Match
     if (data.password && data.confirmPassword && data.password !== data.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match.';
     }
@@ -85,8 +95,8 @@ const SignUpForm = () => {
     return newErrors;
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Handle form submission (Updated with fetch API call)
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitMessage('');
     setShouldRedirect(false);
@@ -95,18 +105,47 @@ const SignUpForm = () => {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      setIsSubmitting(true);
-      
-      // --- Simulate API Call ---
-      setTimeout(() => {
+      const { username, email, password, firstName, lastName } = formData;
+
+      try {
+        setIsSubmitting(true);
+        setSubmitMessage('Creating account...');
+
+        // API Call to backend on port 5000
+        const response = await fetch('http://localhost:5000/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            password,
+            // Map camelCase to backend's snake_case schema
+            first_name: firstName, 
+            last_name: lastName    
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Success (Status 201)
+          console.log('Signup successful. API Response:', data);
+          setSubmitMessage(`🎉 Signup successful! You will be redirected to login.`);
+          // Here you would typically store the received 'data.token'
+          setShouldRedirect(true);
+        } else {
+          // Error (Status 400, 500, etc. from server validation)
+          setSubmitMessage(`🚫 Signup Failed: ${data.message || 'An unknown server error occurred.'}`);
+        }
+
+      } catch (error) {
+        console.error('Network or Fetch Error:', error);
+        setSubmitMessage('🚫 Network error. Check if the server is running on port 5000.');
+      } finally {
         setIsSubmitting(false);
-        console.log('Form Data Submitted:', formData); 
-        setSubmitMessage('🎉 Sign-up successful! You will be redirected to login.');
-        setShouldRedirect(true); // Trigger redirection
-        // Optionally clear form data on success
-        // setFormData({ username: '', email: '', password: '', confirmPassword: '' });
-      }, 1500);
-      // --------------------------
+      }
     } else {
       setSubmitMessage('🚫 Please review the form errors.');
     }
@@ -116,41 +155,77 @@ const SignUpForm = () => {
   useEffect(() => {
     if (shouldRedirect) {
       const timer = setTimeout(() => {
-        // In a real app, you would use navigate('/login') here
-        window.location.href = '/login'; // Simulated redirect to login page
-        // Reset state after simulated redirect
-        setShouldRedirect(false); 
-        setSubmitMessage('');
+        // FIX: Use standard browser navigation for compatibility
+        window.location.href = '/login'; 
       }, 1500); 
 
       return () => clearTimeout(timer);
     }
   }, [shouldRedirect]);
     
-  // Reusable classes
-  const inputClass = (isError) => 
-    `w-full p-3 pl-10 border text-gray-800 rounded-xl outline-none transition-all duration-200 focus:ring-4 focus:ring-offset-2 ${
-      isError 
-        ? 'border-red-500 focus:border-red-600 focus:ring-red-200' 
-        : 'border-gray-300 focus:border-blue-600 focus:ring-blue-200'
+  // Reusable Tailwind Classes
+  
+  // Base class for inputs, handles error states and spacing for icons
+  const inputClass = (fieldName, hasIcon = true) => 
+    `w-full p-3 text-gray-800 rounded-xl outline-none transition-all duration-200 focus:ring-4 focus:ring-offset-2 shadow-sm ${hasIcon ? 'pl-10' : ''} ${
+      errors[fieldName] 
+        ? 'border-2 border-red-500 focus:border-red-600 focus:ring-red-200' 
+        : 'border border-gray-300 focus:border-blue-600 focus:ring-blue-200'
     }`;
   
-  const iconBaseClass = "absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400";
+  const iconBaseClass = "absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none";
 
   return (
     // Outer container for centering and responsive width
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-inter">
       
-      {/* Form Card (Responsive: max-w-lg on mobile, max-w-2xl on desktop) */}
-      <div className="w-full max-w-lg md:max-w-xl bg-white p-8 md:p-12 shadow-2xl rounded-2xl">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">
+      {/* Form Card */}
+      <div className="w-full max-w-lg bg-white p-8 md:p-10 shadow-2xl rounded-2xl border border-gray-100">
+        <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center flex items-center justify-center">
+            <UserPlus className="w-8 h-8 mr-3 text-blue-600" />
           Create Account
         </h2>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           
+          {/* First Name & Last Name Fields (Side-by-side on desktop) */}
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-5 md:space-y-0">
+            {/* First Name Field */}
+            <div className="w-full">
+              <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-1">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                placeholder="John"
+                value={formData.firstName}
+                onChange={handleChange}
+                className={inputClass('firstName', false)} // No icon, so pass false
+                aria-invalid={!!errors.firstName}
+              />
+              {errors.firstName && <p className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.firstName}</p>}
+            </div>
+
+            {/* Last Name Field */}
+            <div className="w-full">
+              <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-1">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                placeholder="Doe"
+                value={formData.lastName}
+                onChange={handleChange}
+                className={inputClass('lastName', false)} // No icon, so pass false
+                aria-invalid={!!errors.lastName}
+              />
+              {errors.lastName && <p className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.lastName}</p>}
+            </div>
+          </div>
+
+
           {/* Username Field */}
-          <div className="form-group">
+          <div>
             <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-1">Username</label>
             <div className="relative">
               <User className={iconBaseClass} />
@@ -161,16 +236,15 @@ const SignUpForm = () => {
                 placeholder="Choose a unique username"
                 value={formData.username}
                 onChange={handleChange}
-                className={inputClass(errors.username)}
+                className={inputClass('username')}
                 aria-invalid={!!errors.username}
-                aria-describedby={errors.username ? 'username-error' : null}
               />
             </div>
             {errors.username && <p id="username-error" className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.username}</p>}
           </div>
 
           {/* Email Field */}
-          <div className="form-group">
+          <div>
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
             <div className="relative">
               <Mail className={iconBaseClass} />
@@ -181,9 +255,8 @@ const SignUpForm = () => {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className={inputClass(errors.email)}
+                className={inputClass('email')}
                 aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? 'email-error' : null}
               />
             </div>
             {errors.email && <p id="email-error" className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.email}</p>}
@@ -191,7 +264,7 @@ const SignUpForm = () => {
 
           
           {/* Password Field */}
-          <div className="form-group">
+          <div>
             <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
             <div className="relative">
               <Lock className={iconBaseClass} />
@@ -202,9 +275,8 @@ const SignUpForm = () => {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className={inputClass(errors.password)}
+                className={inputClass('password')}
                 aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? 'password-error' : 'password-hint'}
               />
             </div>
             {errors.password && <p id="password-error" className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.password}</p>}
@@ -216,7 +288,7 @@ const SignUpForm = () => {
           </div>
 
           {/* Confirm Password Field */}
-          <div className="form-group">
+          <div>
             <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password</label>
             <div className="relative">
               <Lock className={iconBaseClass} />
@@ -227,9 +299,8 @@ const SignUpForm = () => {
                 placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={inputClass(errors.confirmPassword)}
+                className={inputClass('confirmPassword')}
                 aria-invalid={!!errors.confirmPassword}
-                aria-describedby={errors.confirmPassword ? 'confirm-password-error' : null}
               />
             </div>
             {errors.confirmPassword && <p id="confirm-password-error" className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.confirmPassword}</p>}
@@ -261,7 +332,7 @@ const SignUpForm = () => {
           
           {/* Submission Message */}
           {submitMessage && (
-            <p className={`mt-4 p-3 rounded-xl text-center font-medium flex items-center justify-center ${
+            <p className={`mt-4 p-3 rounded-xl text-center font-semibold flex items-center justify-center ${
               submitMessage.includes('successful') 
                 ? 'bg-green-100 text-green-700' 
                 : 'bg-red-100 text-red-700'
@@ -276,12 +347,13 @@ const SignUpForm = () => {
           )}
 
           {/* Login Link */}
-          <div className='text-center mt-6 pt-4 border-t border-gray-100'>
+          <div className='text-center mt-6 pt-4 border-t border-gray-200'>
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition duration-150">
+              {/* FIX: Changed Link to standard anchor tag */}
+              <a href="/login" className="font-bold text-blue-600 hover:text-blue-700 transition duration-150">
                 Log In
-              </Link>
+              </a>
             </p>
           </div>
         </form>
