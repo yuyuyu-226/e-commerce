@@ -13,7 +13,14 @@ const app = express();
 connectDB();
 
 //Allow frontend connection
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: "*",
+    allowedHeaders: "*",
+  })
+);
 //Middleware to parse JSON
 app.use(express.json());
 
