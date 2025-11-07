@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, LogIn, X, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom'; // Assuming routing is set up
+// Note: Removed 'Link' import to prevent router context errors
 
-// --- Test Credentials (TEMPORARY) ---
-const TEST_EMAIL = 'test@example.com';
-const TEST_PASSWORD = 'Test1234';
-// ------------------------------------
+// API Endpoint from your server.js and auth.js
+const API_URL = 'http://localhost:5000/auth/login';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -53,8 +51,8 @@ const LoginForm = () => {
     return newErrors;
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Handle form submission with real API call
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitMessage('');
 
@@ -64,21 +62,45 @@ const LoginForm = () => {
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
 
-      // --- Simulate API Call & Validation ---
-      setTimeout(() => {
-        setIsSubmitting(false);
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // Body matches your authController.js (email, password)
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
 
-        if (formData.email === TEST_EMAIL && formData.password === TEST_PASSWORD) {
-          // Success
-          setSubmitMessage(''); // Clear any previous error
+        if (response.ok) {
+          // Successful login (Status 200)
+          const data = await response.json();
+          
+          // --- IMPORTANT ---
+          // This is where you would save the token for future requests
+          // Example: localStorage.setItem('token', data.token);
+          console.log('Login successful, token received:', data.token);
+          
+          setSubmitMessage(''); 
           setShowModal(true); // Show the success modal
+          
         } else {
-          // Failure
-          setSubmitMessage('🚫 Invalid email or password.');
+          // Server returned an error (e.g., 400, 401)
+          const errorData = await response.json();
+          // Set error message based on your backend's response format
+          setSubmitMessage(`🚫 ${errorData.message || 'Invalid email or password.'}`);
           setFormData({ ...formData, password: '' }); // Clear password field on failure
         }
-      }, 1500);
-      // ---------------------------------------
+      } catch (error) {
+        // Network errors (e.g., server not running, CORS issues)
+        console.error('Login Fetch Error:', error);
+        setSubmitMessage('⚠️ Could not connect to the server. Check network or CORS settings.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -86,8 +108,7 @@ const LoginForm = () => {
   useEffect(() => {
     if (showModal) {
       const timer = setTimeout(() => {
-        window.location.href = '/';
-        // Close modal after redirection message
+        window.location.href = '/'; // Redirect to home page
         setShowModal(false); 
       }, 2000); // Wait 2 seconds before "redirecting"
 
@@ -103,6 +124,7 @@ const LoginForm = () => {
 
   return (
     <>
+      {/* Using max-w-xl to match the signup form's width */}
       <div className="w-full max-w-lg md:max-w-xl bg-white p-8 md:p-12 shadow-2xl rounded-2xl">
         <h2 className="text-3xl font-normal text-center text-gray-800 mb-8">
           Login
@@ -112,7 +134,7 @@ const LoginForm = () => {
           {/* Email Field */}
           <div className="mb-6">
             <label htmlFor="email" className={labelClasses}>
-              Username
+              Email
             </label>
             <div className="relative">
               <Mail className="absolute top-1/2 left-3 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -120,7 +142,7 @@ const LoginForm = () => {
                 type="email"
                 id="email"
                 name="email"
-                placeholder="Username"
+                placeholder="Email Address"
                 value={formData.email}
                 onChange={handleChange}
                 className={`${baseInputClasses} ${errors.email ? errorInputClasses : ''}`}
@@ -151,11 +173,11 @@ const LoginForm = () => {
             {errors.password && <p className={errorTextClasses}>{errors.password}</p>}
           </div>
 
-          {/* Forgot Password Link */}
+          {/* Forgot Password Link (as an <a> tag) */}
           <div className="flex justify-end mb-8">
-            <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition duration-150">
+            <a href="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition duration-150">
               Forgot Password?
-            </Link>
+            </a>
           </div>
 
           {/* Submission Button */}
@@ -186,13 +208,13 @@ const LoginForm = () => {
             </p>
           )}
 
-          {/* Sign Up Link */}
+          {/* Sign Up Link (as an <a> tag) */}
           <div className='text-center mt-6'>
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition duration-150">
+              <a href="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition duration-150">
                 Sign Up
-              </Link>
+              </a>
             </p>
           </div>
         </form>
