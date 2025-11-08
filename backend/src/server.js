@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
+import productRoutes from "./routes/products.js";
+import path from "path";
+import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "./middleware/authMiddleware.js";
 
@@ -31,6 +34,12 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/auth", authRoutes);
+app.use("/products", productRoutes);
+
+// Serve static images
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 //Server
 const PORT = process.env.PORT || 5000;
