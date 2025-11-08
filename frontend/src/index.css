@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+:root {
+  /* Primary Colors */
+  --color-primary-dark: #190933;   /* Deep Indigo */
+  --color-primary-accent: #5DD9C1; /* Vibrant Mint (CTA, Success) */
+  
+  /* Secondary/Neutral Colors */
+  --color-secondary-subtle: #665687; /* Muted Purple (Borders, Secondary Text) */
+  --color-secondary-highlight: #B084CC; /* Muted Lavender (Highlight/Sale Tag) */
+  
+  /* Light Background Accent */
+  --color-light-accent: #ACFCD9;   /* Pale Mint / Near White */
+  
+  /* Basic Text & Background */
+  --color-text: var(--color-primary-dark);
+  --color-background: #ffffff;
+}
