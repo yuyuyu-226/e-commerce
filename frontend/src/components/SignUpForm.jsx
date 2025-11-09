@@ -176,7 +176,7 @@ const SignUpForm = () => {
   const iconBaseClass = "absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none";
 
   return (
-    // Outer container: Set background to light-accent for the centering area
+    
     <div className="min-h-screen flex items-center justify-center p-4 font-inter" style={{ backgroundColor: 'var(--color-light-accent)' }}>
       
       {/* Form Card */}
@@ -217,7 +217,7 @@ const SignUpForm = () => {
                 placeholder="Doe"
                 value={formData.lastName}
                 onChange={handleChange}
-                className={inputClass('lastName', false)} // No icon, so pass false
+                className={inputClass('lastName', false)}
                 aria-invalid={!!errors.lastName}
               />
               {errors.lastName && <p className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.lastName}</p>}
@@ -312,7 +312,6 @@ const SignUpForm = () => {
             <button 
               type="submit" 
               disabled={isSubmitting || shouldRedirect} 
-              // Set button background to primary accent
               style={{ backgroundColor: 'var(--color-primary-accent)', color: 'var(--color-primary-dark)' }}
               className={`w-full flex items-center justify-center py-3 px-4 rounded-full font-bold transition-all duration-300 transform hover:scale-[1.01] shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-[var(--color-primary-accent)] ${
                 isSubmitting || shouldRedirect
