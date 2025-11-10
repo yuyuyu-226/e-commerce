@@ -167,22 +167,23 @@ const SignUpForm = () => {
   
   // Base class for inputs, handles error states and spacing for icons
   const inputClass = (fieldName, hasIcon = true) => 
-    `w-full p-3 text-gray-800 rounded-xl outline-none transition-all duration-200 focus:ring-4 focus:ring-offset-2 shadow-sm ${hasIcon ? 'pl-10' : ''} ${
+    `w-full p-3 rounded-xl outline-none transition-all duration-200 focus:ring-4 focus:ring-offset-2 shadow-sm ${hasIcon ? 'pl-10' : ''} ${
       errors[fieldName] 
         ? 'border-2 border-red-500 focus:border-red-600 focus:ring-red-200' 
         : 'border border-gray-300 focus:border-blue-600 focus:ring-blue-200'
-    }`;
+    } text-[var(--color-primary-dark)]`; // Use dark color for input text
   
   const iconBaseClass = "absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none";
 
   return (
-    // Outer container for centering and responsive width
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 font-inter">
+    
+    <div className="min-h-screen flex items-center justify-center p-4 font-inter" style={{ backgroundColor: 'var(--color-light-accent)' }}>
       
       {/* Form Card */}
       <div className="w-full max-w-lg bg-white p-8 md:p-10 shadow-2xl rounded-2xl border border-gray-100">
-        <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <UserPlus className="w-8 h-8 mr-3 text-blue-600" />
+        <h2 className="text-3xl font-extrabold mb-8 text-center flex items-center justify-center" style={{ color: 'var(--color-primary-dark)' }}>
+            {/* Icon color set to primary accent */}
+            <UserPlus className="w-8 h-8 mr-3" style={{ color: 'var(--color-primary-accent)' }} />
           Create Account
         </h2>
         
@@ -192,7 +193,7 @@ const SignUpForm = () => {
           <div className="flex flex-col md:flex-row md:space-x-4 space-y-5 md:space-y-0">
             {/* First Name Field */}
             <div className="w-full">
-              <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-1">First Name</label>
+              <label htmlFor="firstName" className="block text-sm font-semibold mb-1" style={{ color: 'var(--color-secondary-subtle)' }}>First Name</label>
               <input
                 type="text"
                 id="firstName"
@@ -208,7 +209,7 @@ const SignUpForm = () => {
 
             {/* Last Name Field */}
             <div className="w-full">
-              <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-1">Last Name</label>
+              <label htmlFor="lastName" className="block text-sm font-semibold mb-1" style={{ color: 'var(--color-secondary-subtle)' }}>Last Name</label>
               <input
                 type="text"
                 id="lastName"
@@ -216,7 +217,7 @@ const SignUpForm = () => {
                 placeholder="Doe"
                 value={formData.lastName}
                 onChange={handleChange}
-                className={inputClass('lastName', false)} // No icon, so pass false
+                className={inputClass('lastName', false)}
                 aria-invalid={!!errors.lastName}
               />
               {errors.lastName && <p className="text-sm text-red-600 mt-1 flex items-center"><AlertTriangle className="w-4 h-4 mr-1" />{errors.lastName}</p>}
@@ -226,7 +227,7 @@ const SignUpForm = () => {
 
           {/* Username Field */}
           <div>
-            <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+            <label htmlFor="username" className="block text-sm font-semibold mb-1" style={{ color: 'var(--color-secondary-subtle)' }}>Username</label>
             <div className="relative">
               <User className={iconBaseClass} />
               <input
@@ -245,7 +246,7 @@ const SignUpForm = () => {
 
           {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+            <label htmlFor="email" className="block text-sm font-semibold mb-1" style={{ color: 'var(--color-secondary-subtle)' }}>Email Address</label>
             <div className="relative">
               <Mail className={iconBaseClass} />
               <input
@@ -265,7 +266,7 @@ const SignUpForm = () => {
           
           {/* Password Field */}
           <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-semibold mb-1" style={{ color: 'var(--color-secondary-subtle)' }}>Password</label>
             <div className="relative">
               <Lock className={iconBaseClass} />
               <input
@@ -289,7 +290,7 @@ const SignUpForm = () => {
 
           {/* Confirm Password Field */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password</label>
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold mb-1" style={{ color: 'var(--color-secondary-subtle)' }}>Confirm Password</label>
             <div className="relative">
               <Lock className={iconBaseClass} />
               <input
@@ -311,15 +312,16 @@ const SignUpForm = () => {
             <button 
               type="submit" 
               disabled={isSubmitting || shouldRedirect} 
-              className={`w-full flex items-center justify-center py-3 px-4 rounded-full font-bold text-white transition-all duration-300 transform hover:scale-[1.01] shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2 ${
+              style={{ backgroundColor: 'var(--color-primary-accent)', color: 'var(--color-primary-dark)' }}
+              className={`w-full flex items-center justify-center py-3 px-4 rounded-full font-bold transition-all duration-300 transform hover:scale-[1.01] shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-[var(--color-primary-accent)] ${
                 isSubmitting || shouldRedirect
-                  ? 'bg-blue-400 cursor-not-allowed opacity-80' 
-                  : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300'
+                  ? 'opacity-80 cursor-not-allowed' 
+                  : 'hover:opacity-90'
               }`}
             >
               {isSubmitting ? (
                 <>
-                  <Loader className="w-5 h-5 mr-2 animate-spin" /> 
+                  <Loader className="w-5 h-5 mr-2 animate-spin" style={{ color: 'var(--color-primary-dark)' }} /> 
                   Processing...
                 </>
               ) : shouldRedirect ? (
@@ -334,11 +336,11 @@ const SignUpForm = () => {
           {submitMessage && (
             <p className={`mt-4 p-3 rounded-xl text-center font-semibold flex items-center justify-center ${
               submitMessage.includes('successful') 
-                ? 'bg-green-100 text-green-700' 
+                ? 'bg-[var(--color-light-accent)] text-[var(--color-primary-dark)]' // Success uses light accent background
                 : 'bg-red-100 text-red-700'
             }`}>
               {submitMessage.includes('successful') ? (
-                <CheckCircle className="w-5 h-5 mr-2" />
+                <CheckCircle className="w-5 h-5 mr-2" style={{ color: 'var(--color-primary-accent)' }} /> // Success checkmark uses primary accent
               ) : (
                 <AlertTriangle className="w-5 h-5 mr-2" />
               )}
@@ -350,8 +352,8 @@ const SignUpForm = () => {
           <div className='text-center mt-6 pt-4 border-t border-gray-200'>
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              {/* FIX: Changed Link to standard anchor tag */}
-              <a href="/login" className="font-bold text-blue-600 hover:text-blue-700 transition duration-150">
+              {/* Login link uses secondary highlight color */}
+              <a href="/login" className="font-bold hover:opacity-80 transition duration-150" style={{ color: 'var(--color-secondary-highlight)' }}>
                 Log In
               </a>
             </p>

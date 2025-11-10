@@ -44,3 +44,31 @@ const App = () => {
 };
 
 export default App;
+
+{/*}
+        <h2 className="text-2xl font-semibold mb-6" style={{ color: 'var(--color-light-accent)' }}>Catalog</h2>
+        
+        
+        <div className="space-y-4">
+          
+          
+          <div className="p-2 bg-white rounded-lg flex items-center border border-gray-300">
+            <Search className="w-5 h-5 text-gray-500 mr-2" />
+            <span className="text-gray-500 text-sm">Search (Removed)</span>
+          </div>
+
+          
+          <div className="space-y-3 p-2 border-t" style={{ borderColor: 'var(--color-light-accent)' }}>
+            <h4 className="font-medium" style={{ color: 'var(--color-light-accent)' }}>Filters (Removed)</h4>
+            <div className="flex items-center space-x-2">
+                <input type="checkbox" disabled className="w-4 h-4 rounded" style={{ accentColor: 'var(--color-primary-accent)' }} />
+                <label className="text-gray-200">Category 1</label>
+            </div>
+            <div className="flex items-center space-x-2">
+                <input type="checkbox" disabled className="w-4 h-4 rounded" style={{ accentColor: 'var(--color-primary-accent)' }} />
+                <label className="text-gray-200">Category 2</label>
+            </div>
+          </div>
+
+        </div>
+        */}
