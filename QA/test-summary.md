@@ -13,3 +13,11 @@
 The first week was the setting up phase, the time was used to familiarize with the repository. Planning and structuring for the QA was finished within the timeframe.
 
 ---
+
+## Auth Test
+
+**Summary:**
+
+The Auth test was fully completed on Nov 7, 2025. All tests were addressed, and all core functions passed. The are some notable partial results however, these are test IDs: AUTH-01, AUTH-06, and AUTH-07. For more information, view notes at QA/test cases/auth-test.md
+
+---
