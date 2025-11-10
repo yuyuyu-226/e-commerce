@@ -1,5 +1,8 @@
 import express from "express";
-import { getCategories, getProducts } from "../controllers/productController.js";
+import {
+  getProducts,
+  getCategories,
+} from "../controllers/productController.js";
 
 const router = express.Router();
 
@@ -7,6 +10,5 @@ const router = express.Router();
 router.get("/getProducts", getProducts);
 
 //fetch list of unique categories
-router.get("/categories", getCategories);
-
+router.get("/getCategories", getCategories);
 export default router;
