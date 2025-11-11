@@ -11,4 +11,5 @@ router.get("/getProducts", getProducts);
 
 //fetch list of unique categories
 router.get("/getCategories", getCategories);
+
 export default router;
