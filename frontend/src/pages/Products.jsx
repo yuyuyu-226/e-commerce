@@ -12,6 +12,14 @@ const ProductCard = ({ product }) => {
   // Initialize with the URL from the database
   const [imageSrc, setImageSrc] = useState(imageUrl);
 
+  // Helper to handle navigation to the detail page
+  const handleClick = () => {
+    // Determine the correct ID. MongoDB uses _id which might be an object containing $oid.
+    const id = product._id.$oid || product._id;
+    // Redirect to the product-details page using the unique ID
+    window.location.href = `/product-details/${id}`;
+  };
+
   // Fallback function for broken images
   const handleImageError = () => {
     // Set a placeholder image on error and prevent infinite attempts
@@ -19,7 +27,10 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-xl overflow-hidden transition-transform duration-300 hover:shadow-2xl hover:-translate-y-1 border border-gray-100">
+    <div 
+      className="bg-white rounded-lg shadow-xl overflow-hidden transition-transform duration-300 hover:shadow-2xl hover:-translate-y-1 border border-gray-100 cursor-pointer"
+      onClick={handleClick} // Make the entire card clickable
+    >
       
       {/* Image Display */}
       <div className="h-48 flex items-center justify-center relative bg-gray-50">
@@ -51,6 +62,8 @@ const ProductCard = ({ product }) => {
 maximumFractionDigits: 2, }) : "N/A"}
           </span>
           <button 
+            // Prevent card click from triggering when clicking the button
+            onClick={handleClick}
             className="flex items-center text-[var(--color-primary-dark)] px-4 py-2 rounded-full text-sm font-semibold transition-colors shadow-md hover:opacity-90"
             style={{ backgroundColor: 'var(--color-primary-accent)' }}
           >
@@ -111,15 +124,15 @@ const ProductPage = () => {
         setProducts(data);
         
         // --- CLIENT-SIDE CATEGORY EXTRACTION FIX ---
-        // Always populate the master categories list based on the full unfiltered product data
+        // Always populate the master categories list based on the full product data
         if (!selectedCategory && !searchQuery && categories.length === 0) {
-            // Only update categories if we are showing ALL products on first load
             setCategories(extractCategories(data));
         }
-        // If categories are still empty after the initial load, force an update from the current full set
+        // Fallback for initial load
         if (categories.length === 0 && data.length > 0) {
             setCategories(extractCategories(data));
         }
+        // ------------------------------------------
 
       } catch (err) {
         console.error("Failed to fetch products:", err);
@@ -130,7 +143,7 @@ const ProductPage = () => {
     };
 
     fetchProducts();
-  }, [selectedCategory, sortBy, searchQuery, categories.length]);
+  }, [selectedCategory, sortBy, searchQuery, categories.length]); // Depends on all filter states
 
   const renderContent = () => {
     if (loading) {
@@ -162,6 +175,7 @@ const ProductPage = () => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
         {products.map(product => (
+          // Use the ProductCard with the new click handler
           <ProductCard key={product._id.$oid || product._id} product={product} /> 
         ))}
       </div>
@@ -184,7 +198,7 @@ const ProductPage = () => {
   };
 
   return (
-    // Main Container
+    // Main Container: Set background to light accent
     <div className="min-h-screen flex font-inter" style={{ backgroundColor: 'var(--color-light-accent)' }}>
       
       {/* 1. Sidebar Column (Filters/Navigation Container) */}
@@ -197,9 +211,8 @@ const ProductPage = () => {
         </h2>
 
         {/* Search Bar */}
-        <div className="relative flex items-center mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-primary-dark)' }}>
-    
-            <Search className="absolute left-3 w-5 h-5 text-gray-500" /> 
+        <div className="relative mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-primary-dark)' }}>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
             <input
                 type="text"
                 placeholder="Search products..."
@@ -231,6 +244,7 @@ const ProductPage = () => {
             }}
           >
             <option value="">All Categories</option>
+            {/* Mapping through extracted categories */}
             {categories.map((category) => (
               <option key={category} value={category}>
                 {category}
