@@ -7,7 +7,8 @@
 | PLP-03       | Verify sorting by price           | Select “Price: Low to High”   | Products reorder accordingly               |    Complete    |    Pass    |    Price sorting works functionally. However, the products noticably flicker when sorting   |
 | PLP-04       | Verify filtering by category      | Choose a category filter      | Only matching products are shown           |    Complete    |     Pass   |    Filters work as expected   |
 | PLP-05       | Verify search functionality       | Enter keyword in search bar   | Matching products displayed                |    Complete    |    Pass    |    Search functionality works as expected with similar issue of BUG-005   |
-| PLP-06       | Verify product quick view         | Hover/click quick view button | Product preview modal opens                |     Pending   |        |       |
+| PLP-06       | Verify product quick view         | Hover/click quick view button | Product preview modal opens                |     Commplete   |    Pass    |    Product View works as expected| 
 
 **Last Updated:** November 12, 2025
+
 
