@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Image, ShoppingCart, Loader, AlertTriangle } from 'lucide-react';
+import { Image, ShoppingCart, Loader, AlertTriangle, Search } from 'lucide-react';
 
 // Base URL for your Express backend
 const API_BASE_URL = 'http://localhost:5000';
 
-// --- Product Card Component (No Change) ---
+// --- Product Card Component ---
 const ProductCard = ({ product }) => {
   // Use the full URL from the database
   const imageUrl = product.image_url || null; 
@@ -14,6 +14,7 @@ const ProductCard = ({ product }) => {
 
   // Fallback function for broken images
   const handleImageError = () => {
+    // Set a placeholder image on error and prevent infinite attempts
     setImageSrc("https://placehold.co/400x300/e0e0e0/555555?text=No+Image");
   };
 
@@ -65,9 +66,10 @@ maximumFractionDigits: 2, }) : "N/A"}
 // --- Main Product Page Component ---
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]); // This is the master list
-  const [selectedCategory, setSelectedCategory] = useState(''); 
-  const [sortBy, setSortBy] = useState(''); 
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(''); // Category Filter
+  const [sortBy, setSortBy] = useState(''); // Price Sort
+  const [searchQuery, setSearchQuery] = useState(''); // Search Filter
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -92,6 +94,9 @@ const ProductPage = () => {
         if (sortBy) {
           params.append('sort', sortBy);
         }
+        if (searchQuery.trim()) {
+          params.append('query', searchQuery.trim()); // Send search query
+        }
         
         const queryString = params.toString();
         const url = `${API_BASE_URL}/products/getProducts${queryString ? `?${queryString}` : ''}`;
@@ -105,20 +110,16 @@ const ProductPage = () => {
         const data = await response.json();
         setProducts(data);
         
-        // --- FIX: Only update the master category list on initial load ---
-        if (categories.length === 0) {
-           // To get all categories, we must fetch ALL products once (no filter)
-           // If a filter is currently applied, we must first fetch all products without the filter.
-           if (!selectedCategory) {
-             setCategories(extractCategories(data));
-           } else {
-             // If a filter is active, fetch all categories from the unfiltered endpoint
-             const allProductsResponse = await fetch(`${API_BASE_URL}/products/getProducts`);
-             const allProductsData = await allProductsResponse.json();
-             setCategories(extractCategories(allProductsData));
-           }
+        // --- CLIENT-SIDE CATEGORY EXTRACTION FIX ---
+        // Always populate the master categories list based on the full unfiltered product data
+        if (!selectedCategory && !searchQuery && categories.length === 0) {
+            // Only update categories if we are showing ALL products on first load
+            setCategories(extractCategories(data));
         }
-        // ------------------------------------------
+        // If categories are still empty after the initial load, force an update from the current full set
+        if (categories.length === 0 && data.length > 0) {
+            setCategories(extractCategories(data));
+        }
 
       } catch (err) {
         console.error("Failed to fetch products:", err);
@@ -129,7 +130,7 @@ const ProductPage = () => {
     };
 
     fetchProducts();
-  }, [selectedCategory, sortBy, categories.length]); // categories.length added for initial fetch check
+  }, [selectedCategory, sortBy, searchQuery, categories.length]);
 
   const renderContent = () => {
     if (loading) {
@@ -153,7 +154,7 @@ const ProductPage = () => {
     if (products.length === 0) {
       return (
         <div className="text-center p-10 bg-gray-100 rounded-lg shadow-inner">
-          <p className="text-gray-600 font-semibold">No products found in this category.</p>
+          <p className="text-gray-600 font-semibold">No products found in this category or matching your search.</p>
         </div>
       );
     }
@@ -177,8 +178,13 @@ const ProductPage = () => {
     setSortBy(value);
   };
 
+  // Helper to handle search input changes
+  const handleSearchChange = (e) => {
+      setSearchQuery(e.target.value);
+  };
+
   return (
-    // Main Container: Set background to light accent
+    // Main Container
     <div className="min-h-screen flex font-inter" style={{ backgroundColor: 'var(--color-light-accent)' }}>
       
       {/* 1. Sidebar Column (Filters/Navigation Container) */}
@@ -186,11 +192,32 @@ const ProductPage = () => {
         className="w-64 p-6 shadow-2xl hidden sm:block border-r border-gray-300 flex-shrink-0 text-[var(--color-primary-dark)]" 
         style={{ backgroundColor: 'var(--color-secondary-subtle)' }}
       >
-        <h2 className="text-xl font-bold mb-4 border-b pb-2" style={{ borderColor: 'var(--color-primary-dark)' }}>
-          Categories
+        <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--color-primary-dark)' }}>
+          Filters
         </h2>
+
+        {/* Search Bar */}
+        <div className="relative flex items-center mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-primary-dark)' }}>
+    
+            <Search className="absolute left-3 w-5 h-5 text-gray-500" /> 
+            <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full p-2 pl-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-accent)]"
+                style={{ 
+                    borderColor: 'var(--color-primary-dark)',
+                    color: 'var(--color-primary-dark)',
+                    backgroundColor: 'var(--color-light-accent)'
+                }}
+            />
+        </div>
         
-        {/* Dropdown Filter Group */}
+        {/* Category Dropdown Filter Group */}
+        <h2 className="text-lg font-bold mb-3" style={{ color: 'var(--color-primary-dark)' }}>
+          Category
+        </h2>
         <div className="space-y-3">
           <select
             id="categoryFilter"
@@ -200,11 +227,10 @@ const ProductPage = () => {
             style={{ 
               borderColor: 'var(--color-primary-dark)', 
               color: 'var(--color-primary-dark)',
-              backgroundColor: 'var(--color-light-accent)' 
+              backgroundColor: 'var(--color-light-accent)'
             }}
           >
             <option value="">All Categories</option>
-            {/* Mapping through the MASTER categories list */}
             {categories.map((category) => (
               <option key={category} value={category}>
                 {category}

@@ -4,7 +4,7 @@ import Product from "../models/Product.js";
 export const getProducts = async (req, res) => {
   try {
     //For fitlering by category
-    const { category, sort } = req.query;
+    const { category, sort, query } = req.query;
     const filter = {};
 
     if (category) {
@@ -17,6 +17,14 @@ export const getProducts = async (req, res) => {
       sortOption.price = 1; // Ascending
     } else if (sort === "price_desc") {
       sortOption.price = -1; // Descending
+    }
+
+    //for searching by name or description
+    if (query && query.trim() !== "") {
+      filter.$or = [
+        { name: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+      ];
     }
 
     //fetch products from DB based on filter and sort options
