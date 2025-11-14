@@ -13,6 +13,7 @@ import About from './pages/About.jsx';
 import SignUp from './pages/SignUp.jsx';
 import Login from './pages/Login.jsx';
 import ProductDetails from './pages/ProductDetails.jsx';
+import Checkout from './pages/Checkout.jsx';
 
 const App = () => {
   return (
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/product-details/:id" element={<ProductDetails />} />
           
           {/* Optional: Add a 404 Not Found route */}

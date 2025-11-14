@@ -212,7 +212,10 @@ const ProductPage = () => {
 
         {/* Search Bar */}
         <div className="relative mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-primary-dark)' }}>
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <div className="relative">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Search className="w-5 h-5 text-gray-500" />
+        </span>
             <input
                 type="text"
                 placeholder="Search products..."
@@ -225,6 +228,7 @@ const ProductPage = () => {
                     backgroundColor: 'var(--color-light-accent)'
                 }}
             />
+            </div>
         </div>
         
         {/* Category Dropdown Filter Group */}
