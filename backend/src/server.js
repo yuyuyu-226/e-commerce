@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import productRoutes from "./routes/products.js";
+import orderRoutes from "./routes/orders.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
@@ -35,6 +36,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
+app.use("/orders", orderRoutes);
 
 // Serve static images
 const __filename = fileURLToPath(import.meta.url);
