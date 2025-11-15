@@ -14,6 +14,7 @@ import SignUp from './pages/SignUp.jsx';
 import Login from './pages/Login.jsx';
 import ProductDetails from './pages/ProductDetails.jsx';
 import Checkout from './pages/Checkout.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/product-details/:id" element={<ProductDetails />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           
           {/* Optional: Add a 404 Not Found route */}
           {/* <Route path="*" element={<h1>404 Not Found</h1>} /> */}
