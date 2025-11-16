@@ -1,10 +1,7 @@
-// src/components/NavBar.jsx
-
 import React, { useState } from 'react';
-import { Home, ShoppingBag, Mail, Info, LogIn, Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Home, ShoppingBag, Mail, Info, LogIn, LogOut, Menu, X, User as UserIcon, Shield } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
-// Array of navigation links for easy mapping
 const navLinks = [
   { name: 'Home', icon: Home, path: '/' },
   { name: 'Products', icon: ShoppingBag, path: '/products' },
@@ -12,19 +9,33 @@ const navLinks = [
   { name: 'About', icon: Info, path: '/about' },
 ];
 
-const NavBar = () => {
+// This component now accepts auth state as props
+const NavBar = ({ isLoggedIn, user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
-  // Common Tailwind classes based on your original CSS
+  // Handle the logout action
+  const handleLogout = () => {
+    onLogout(); // Call the logout function from App.jsx
+    setIsOpen(false); // Close mobile menu if open
+    navigate('/'); // Redirect to home
+  };
+
+  // Common Tailwind classes
   const navBarClass = "flex items-center justify-between p-4 bg-gray-200 shadow-xl w-full sticky top-0 z-50 rounded-b-lg";
   const brandClass = "text-xl font-extrabold text-gray-900 mr-8 tracking-wider";
   
   const linkBaseClass = "flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors duration-150 p-2 rounded-lg";
   const iconClass = "w-4 h-4 mr-2";
-  
-  const loginButtonClass = "flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-700 transition-colors duration-150 cursor-pointer";
-  const loginIconClass = "w-4 h-4 mr-2 transform rotate-180";
 
+  const adminLinkClass = "flex items-center text-sm font-medium p-2 rounded-lg text-yellow-700 bg-yellow-200 hover:bg-yellow-300";
+  
+  // --- Button Classes ---
+  const loginButtonClass = "flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-700 transition-colors duration-150 cursor-pointer";
+  // A new class for the Log Out button
+  const logoutButtonClass = "flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg shadow-lg hover:bg-red-500 transition-colors duration-150 cursor-pointer";
+  const loginIconClass = "w-4 h-4 mr-2 transform rotate-180";
+  const logoutIconClass = "w-4 h-4 mr-2";
 
   return (
     <header className={navBarClass}>
@@ -33,13 +44,10 @@ const NavBar = () => {
         <Link to="/" className={brandClass}>
           MyBrand
         </Link>
-        {/* Hamburger Menu Button (visible on mobile) */}
         <button 
           className="md:hidden p-2 text-gray-700 hover:bg-gray-300 rounded-lg"
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
-          aria-controls="mobile-menu"
-          aria-label="Toggle navigation"
         >
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -57,16 +65,38 @@ const NavBar = () => {
             {link.name}
           </Link>
         ))}
+
+        {isLoggedIn && user?.role === 'Admin' && (
+          <Link to="/admin" className={adminLinkClass}>
+            <Shield className={iconClass} />
+            Admin
+          </Link>
+        )}
       </nav>
 
-      {/* Right Side: Login/Sign Up Button (always visible) */}
-      <div className="ml-auto flex-shrink-0">
-        <Link to="/login"> 
-          <button className={loginButtonClass}>
-            <LogIn className={loginIconClass} />
-            Login / Sign Up
-          </button>
-        </Link>
+      {/* Right Side: Conditional Login/Logout Button */}
+      <div className="ml-auto flex-shrink-0 flex items-center space-x-4">
+        {isLoggedIn && user ? (
+          // --- LOGGED IN STATE ---
+          <>
+            <span className="hidden sm:flex items-center text-sm font-medium text-gray-700">
+              <UserIcon className="w-4 h-4 mr-2" />
+              Welcome, {user.username}
+            </span>
+            <button className={logoutButtonClass} onClick={handleLogout}>
+              <LogOut className={logoutIconClass} />
+              Log Out
+            </button>
+          </>
+        ) : (
+          // --- LOGGED OUT STATE ---
+          <Link to="/login"> 
+            <button className={loginButtonClass}>
+              <LogIn className={loginIconClass} />
+              Login / Sign Up
+            </button>
+          </Link>
+        )}
       </div>
 
       {/* Mobile Menu (conditionally rendered) */}
@@ -79,13 +109,37 @@ const NavBar = () => {
             <Link
               key={link.name}
               to={link.path}
-              className={`${linkBaseClass} w-full text-lg`} // Larger text for mobile links
+              className={`${linkBaseClass} w-full text-lg`}
               onClick={() => setIsOpen(false)} // Close menu on link click
             >
               <link.icon className="w-5 h-5 mr-3" />
               {link.name}
             </Link>
           ))}
+          {/* Also add welcome/logout to mobile menu */}
+          {isLoggedIn && user?.role === 'Admin' && (
+            <Link 
+              to="/admin" 
+              className={`${adminLinkClass} w-full text-lg`}
+              onClick={() => setIsOpen(false)}
+            >
+              <Shield className="w-5 h-5 mr-3" />
+              Admin Dashboard
+            </Link>
+          )}
+          
+          {isLoggedIn && user && (
+            <div className="w-full pt-4 border-t border-gray-300">
+              <span className="flex items-center text-lg font-medium text-gray-700 mb-4">
+                <UserIcon className="w-5 h-5 mr-3" />
+                Welcome, {user.username}
+              </span>
+              <button className={`${logoutButtonClass} w-full justify-center text-lg`} onClick={handleLogout}>
+                <LogOut className={logoutIconClass} />
+                Log Out
+              </button>
+            </div>
+          )}
         </nav>
       )}
 
