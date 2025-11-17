@@ -2,7 +2,7 @@ import express from "express";
 import {
   authenticateToken,
   authorizeAdmin,
-} from "../middlewares/authMiddleware.js";
+} from "../middleware/authMiddleware.js";
 import {
   addProduct,
   editProduct,
@@ -23,3 +23,5 @@ router.get("/getAllProducts", adminGetAllProducts);
 router.post("/add", addProduct);
 router.put("/edit/:id", editProduct);
 router.delete("/delete/:id", deleteProduct);
+
+export default router;

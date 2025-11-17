@@ -4,7 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import productRoutes from "./routes/products.js";
-import orderRoutes from "./routes.orders.js";
+import orderRoutes from "./routes/orders.js";
 import admindproductRoutes from "./routes/adminProducts.js";
 import path from "path";
 import { fileURLToPath } from "url";
