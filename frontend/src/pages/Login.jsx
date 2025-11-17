@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // 1. Import useContext
 import { Mail, Lock, LogIn, X, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom'; // Use Link for SPA navigation
+import { Link } from 'react-router-dom'; 
+import { AuthContext } from '../components/AuthContext.jsx'; 
 
-// API Endpoint from your server.js and auth.js
 const API_URL = 'http://localhost:5000/auth/login';
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// 1. Accept 'onLogin' prop from App.jsx
-const Login = ({ onLogin }) => {
+// 3. Remove 'onLogin' from props
+const Login = () => {
+  // 4. Get 'handleLogin' from context
+  const { handleLogin } = useContext(AuthContext);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -17,7 +19,6 @@ const Login = ({ onLogin }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
-  // Removed showModal and useEffect, as App.jsx will handle the redirect
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,23 +61,17 @@ const Login = ({ onLogin }) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
+          body: JSON.stringify(formData),
         });
 
-        const data = await response.json(); // Get data for both success/error
+        const data = await response.json(); 
 
         if (response.ok) {
-          // --- 2. THE FIX ---
-          // Login was successful! Call the 'onLogin' prop from App.jsx
-          // This will update the state in App.jsx and trigger the NavBar change.
-          // (Assuming your backend returns { token, user: {...} })
-          onLogin(data.user);
-          
-          // You can still save the token
+          // --- 5. THE FIX ---
+          // Save the token
           localStorage.setItem('token', data.token);
+          // Call the context function with user data
+          handleLogin(data.user);
           
         } else {
           // Server returned an error
@@ -100,7 +95,6 @@ const Login = ({ onLogin }) => {
 
   return (
     <>
-      {/* This component returns the form, which App.jsx will render on the /login route */}
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--color-light-accent)' }}>
         <div className="w-full max-w-lg md:max-w-xl bg-white p-8 md:p-12 shadow-2xl rounded-2xl">
           <h2 className="text-3xl font-normal text-center text-gray-800 mb-8">
@@ -149,7 +143,6 @@ const Login = ({ onLogin }) => {
             </div>
 
             <div className="flex justify-end mb-8">
-              {/* Use Link for SPA-friendly navigation */}
               <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition duration-150">
                 Forgot Password?
               </Link>
