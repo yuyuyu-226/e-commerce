@@ -1,5 +1,9 @@
 import express from "express";
 import {
+  authenticateToken,
+  authorizeAdmin,
+} from "../middleware/authMiddleware.js";
+import {
   addProduct,
   editProduct,
   deleteProduct,
@@ -13,3 +17,5 @@ router.get("/getAllProducts", adminGetAllProducts);
 router.post("/add", addProduct);
 router.put("/edit/:id", editProduct);
 router.delete("/delete/:id", deleteProduct);
+
+export default router;
