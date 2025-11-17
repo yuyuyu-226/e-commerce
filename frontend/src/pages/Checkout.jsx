@@ -1,17 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // 1. Import useContext
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, CreditCard, Loader, AlertTriangle, CheckCircle } from 'lucide-react';
-
-// You can use lucide-react's 'Wallet' icon for GCash, or import an actual logo
-import GcashLogo from '../assets/gcash.svg'; 
-import CreditCardLogo from '../assets/credit-card.svg';
+import { ShoppingBag, Loader, AlertTriangle, CheckCircle } from 'lucide-react';
+// 2. Import the context
+import { AuthContext } from '../components/AuthContext.jsx'; 
 
 const API_BASE_URL = 'http://localhost:5000';
+
+// --- 3. Inline SVG Logos (Replaces broken imports) ---
+const GcashLogo = () => (
+  <svg className="w-10 h-10 mr-4" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 130V30C0 13.4315 13.4315 0 30 0H130C146.569 0 160 13.4315 160 30V130C160 146.569 146.569 160 130 160H30C13.4315 160 0 146.569 0 130Z" fill="#0057E5"/>
+    <path fillRule="evenodd" clipRule="evenodd" d="M107.828 75.832L83.055 51.059L78.14 55.973L98.01 75.832H61.99V84.168H98.01L78.14 104.027L83.055 108.941L107.828 84.168V75.832Z" fill="white"/>
+    <path d="M48 48H32V64H48V48Z" fill="white"/>
+    <path d="M48 96H32V112H48V96Z" fill="white"/>
+    <path d="M128 48H112V64H128V48Z" fill="white"/>
+  </svg>
+);
+
+const CreditCardLogo = () => (
+  <svg className="w-10 h-auto mr-4" viewBox="0 0 32 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="32" height="20" rx="3" fill="#4A4A4A"/>
+    <rect y="4" width="32" height="4" fill="#979797"/>
+    <rect x="20" y="12" width="8" height="2" fill="white"/>
+  </svg>
+);
+// --- End SVG Logos ---
+
 
 const Checkout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     
+    // --- 4. GET THE USER FROM CONTEXT ---
+    const { user } = useContext(AuthContext);
+
     // Get the order data passed from the ProductDetails page
     const { product, quantity, address, totalAmount } = location.state || {};
 
@@ -25,26 +47,40 @@ const Checkout = () => {
             return;
         }
 
+        // --- 5. CHECK FOR REAL USER ID ---
+        if (!user || !user._id) { // Use _id (or id) from your token
+            setError("User session error. Please log in again.");
+            return;
+        }
+        
+        // --- 6. GET TOKEN FOR API CALL ---
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError("Authentication token not found. Please log in again.");
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
-        
-        // This is the same logic that was in ProductDetails.jsx
-        // You'll need to get the real user ID from your auth context
-        const mockUserId = '690ecd4a9345e9e5bf44685a'; 
 
         try {
             const orderData = {
-                userId: mockUserId, 
+                // --- 7. USE THE REAL USER ID ---
+                userId: user._id, 
                 productId: product._id,
                 quantity: quantity,
                 address: address,
                 totalAmount: totalAmount,
-                // You could also add 'paymentMethod' to your backend Order model
+                paymentMethod: paymentMethod
             };
 
             const response = await fetch(`${API_BASE_URL}/orders`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // --- 8. ADD AUTHORIZATION HEADER ---
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(orderData),
             });
 
@@ -129,8 +165,7 @@ const Checkout = () => {
                         {/* GCash Option */}
                         <div className={getPaymentOptionClass('gcash')} onClick={() => setPaymentMethod('gcash')}>
                             <div className="flex items-center">
-                                {/*  You can use an <img> tag here */}
-                                <img src={GcashLogo} alt="GCash" className="w-10 h-10 mr-4 object-contain"/>
+                                <GcashLogo />
                                 <span className="font-semibold">Pay with GCash</span>
                             </div>
                             {paymentMethod === 'gcash' && <CheckCircle className="w-6 h-6" style={{ color: 'var(--color-primary-accent)' }} />}
@@ -139,8 +174,7 @@ const Checkout = () => {
                         {/* Credit Card Option */}
                         <div className={getPaymentOptionClass('creditcard')} onClick={() => setPaymentMethod('creditcard')}>
                             <div className="flex items-center">
-                                {/*  You can use an <img> tag here */}
-                                <img src={CreditCardLogo} alt="Visa" className="w-10 h-6 mr-2 object-contain"/>
+                                <CreditCardLogo />
                                 <span className="font-semibold">Pay with Credit/Debit Card</span>
                             </div>
                             {paymentMethod === 'creditcard' && <CheckCircle className="w-6 h-6" style={{ color: 'var(--color-primary-accent)' }} />}

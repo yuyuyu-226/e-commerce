@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // 1. Import useContext
 import { Home, ShoppingBag, Mail, Info, LogIn, LogOut, Menu, X, User as UserIcon, Shield } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from './AuthContext.jsx'; // 2. Import the context
 
 const navLinks = [
   { name: 'Home', icon: Home, path: '/' },
@@ -9,16 +10,18 @@ const navLinks = [
   { name: 'About', icon: Info, path: '/about' },
 ];
 
-// This component now accepts auth state as props
-const NavBar = ({ isLoggedIn, user, onLogout }) => {
+// 3. Remove props: isLoggedIn, user, onLogout
+const NavBar = () => {
+  // 4. Get auth state directly from context
+  const { isLoggedIn, user, handleLogout } = useContext(AuthContext);
+
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   // Handle the logout action
-  const handleLogout = () => {
-    onLogout(); // Call the logout function from App.jsx
+  const onLogoutClick = () => {
+    handleLogout(); // Call the logout function from context
     setIsOpen(false); // Close mobile menu if open
-    navigate('/'); // Redirect to home
   };
 
   // Common Tailwind classes
@@ -30,9 +33,7 @@ const NavBar = ({ isLoggedIn, user, onLogout }) => {
 
   const adminLinkClass = "flex items-center text-sm font-medium p-2 rounded-lg text-yellow-700 bg-yellow-200 hover:bg-yellow-300";
   
-  // --- Button Classes ---
   const loginButtonClass = "flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg shadow-lg hover:bg-gray-700 transition-colors duration-150 cursor-pointer";
-  // A new class for the Log Out button
   const logoutButtonClass = "flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg shadow-lg hover:bg-red-500 transition-colors duration-150 cursor-pointer";
   const loginIconClass = "w-4 h-4 mr-2 transform rotate-180";
   const logoutIconClass = "w-4 h-4 mr-2";
@@ -81,9 +82,9 @@ const NavBar = ({ isLoggedIn, user, onLogout }) => {
           <>
             <span className="hidden sm:flex items-center text-sm font-medium text-gray-700">
               <UserIcon className="w-4 h-4 mr-2" />
-              Welcome, {user.username}
+              Welcome, {user.username || user.email}
             </span>
-            <button className={logoutButtonClass} onClick={handleLogout}>
+            <button className={logoutButtonClass} onClick={onLogoutClick}>
               <LogOut className={logoutIconClass} />
               Log Out
             </button>
@@ -132,9 +133,9 @@ const NavBar = ({ isLoggedIn, user, onLogout }) => {
             <div className="w-full pt-4 border-t border-gray-300">
               <span className="flex items-center text-lg font-medium text-gray-700 mb-4">
                 <UserIcon className="w-5 h-5 mr-3" />
-                Welcome, {user.username}
+                Welcome, {user.username || user.email}
               </span>
-              <button className={`${logoutButtonClass} w-full justify-center text-lg`} onClick={handleLogout}>
+              <button className={`${logoutButtonClass} w-full justify-center text-lg`} onClick={onLogoutClick}>
                 <LogOut className={logoutIconClass} />
                 Log Out
               </button>
