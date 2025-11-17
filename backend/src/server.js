@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import productRoutes from "./routes/products.js";
 import orderRoutes from "./routes/orders.js";
+import admindproductRoutes from "./routes/adminProducts.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import jwt from "jsonwebtoken";
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
 app.use("/orders", orderRoutes);
+app.use("/admin/products", admindproductRoutes);
 
 // Serve static images
 const __filename = fileURLToPath(import.meta.url);
