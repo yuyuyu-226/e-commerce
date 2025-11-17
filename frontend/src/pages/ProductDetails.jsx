@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'; // Added useMemo
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; 
 import { ShoppingCart, Loader, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import OrderConfirmationModal from '../components/OrderConfirmationModal.jsx';
-import { FastAverageColor } from "fast-average-color";
+import AuthRedirectModal from '../components/AuthRedirectModal.jsx'; 
+import { FastAverageColor } from "fast-average-color"; // Assumes package is installed
 
 const API_BASE_URL = 'http://localhost:5000';
 
-const ProductDetails = () => {
+// 🌟 FIX: Accept BOTH isLoggedIn AND user from props
+const ProductDetails = ({ isLoggedIn, user }) => { 
     const navigate = useNavigate();
     const fac = useMemo(() => new FastAverageColor(), []);
     
@@ -17,22 +19,40 @@ const ProductDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [imageSrc, setImageSrc] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);       
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [avgColor, setAvgColor] = useState('#f5f5f5'); 
 
     const handleImageError = () => {
         setImageSrc("https://placehold.co/500x500/e0e0e0/555555?text=Product+Image+Error");
     };
 
-    const handleConfirmOrder = async ({ quantity, address, totalAmount }) => {
+    const handleConfirmOrder = ({ quantity, address, totalAmount }) => {
+        // Navigate to checkout page to finalize the order
         navigate('/checkout', { 
             state: { 
                 product, 
                 quantity, 
                 address, 
-                totalAmount 
+                totalAmount,
+                // Pass the user object for use in Checkout.jsx
+                userId: user.id || 'mockUserId' 
             } 
         });
+    };
+
+    // Handler to decide which modal to open
+    const handleOrderClick = () => {
+        if (product.stock === 0) return;
+
+        // 🌟 CHECK: Use the isLoggedIn prop directly, which is guaranteed to be up-to-date from App.jsx
+        if (isLoggedIn) {
+            setIsModalOpen(true);
+            setIsAuthModalOpen(false);
+        } else {
+            setIsAuthModalOpen(true);
+            setIsModalOpen(false);
+        }
     };
 
     const extractAverageColor = useCallback((imageElement) => {
@@ -189,7 +209,7 @@ const ProductDetails = () => {
                             </div>
 
                             <button
-                                onClick={() => product.stock > 0 && setIsModalOpen(true)}
+                                onClick={handleOrderClick}
                                 disabled={product.stock === 0}
                                 className={`w-full max-w-sm py-4 rounded-xl text-lg font-bold text-white transition-all duration-300 shadow-lg ${product.stock > 0 ? 'hover:bg-opacity-90' : 'opacity-50 cursor-not-allowed'}`}
                                 style={{ backgroundColor: 'var(--color-primary-dark)' }}
@@ -209,6 +229,11 @@ const ProductDetails = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onConfirm={handleConfirmOrder}
+            />
+            
+            <AuthRedirectModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
             />
         </div>
     );

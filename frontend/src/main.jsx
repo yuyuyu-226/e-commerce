@@ -8,6 +8,7 @@ import Products from './pages/Products.jsx';
 import Contact from './pages/Contact.jsx';
 import About from './pages/About.jsx';
 
+
 // Import your main component (often named App.jsx or a Layout component)
 // Assuming you will create an App.jsx to hold the common structure (like the NavBar)
 import App from './App.jsx';

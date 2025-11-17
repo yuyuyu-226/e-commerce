@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, LogIn, X, Loader2 } from 'lucide-react';
-// Note: Removed 'Link' import to prevent router context errors
+// Re-added Link and useNavigate for proper SPA navigation
 
-// API Endpoint from your server.js and auth.js
+
 const API_URL = 'http://localhost:5000/auth/login';
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const LoginForm = () => {
+// 1. Accept the 'onLogin' prop from App.jsx
+const LoginForm = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,16 +16,14 @@ const LoginForm = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
-  const [showModal, setShowModal] = useState(false); // State for the success modal
+  const [showModal, setShowModal] = useState(false);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
     });
-    // Clear the error as the user types
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -34,68 +32,63 @@ const LoginForm = () => {
     }
   };
 
-  // Validation logic
   const validate = (data) => {
     let newErrors = {};
-
     if (!data.email.trim()) {
       newErrors.email = 'Email is required.';
     } else if (!EMAIL_REGEX.test(data.email)) {
       newErrors.email = 'Invalid email format.';
     }
-
     if (!data.password) {
       newErrors.password = 'Password is required.';
     }
-
     return newErrors;
   };
 
-  // Handle form submission with real API call
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitMessage('');
-
     const validationErrors = validate(formData);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
-
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          // Body matches your authController.js (email, password)
           body: JSON.stringify({
             email: formData.email,
             password: formData.password,
           }),
         });
 
+        const data = await response.json(); // Get data regardless of response.ok
+
         if (response.ok) {
-          // Successful login (Status 200)
-          const data = await response.json();
+          // --- 2. THIS IS THE FIX ---
+          // Call the onLogin prop from App.jsx with the user data
+          // (Assuming backend sends { token, user: { ... } })
+          if (data.user) {
+            onLogin(data.user); 
+          } else {
+            // Fallback if user object is not nested
+            onLogin({ username: 'User' }); // Pass a placeholder if no user data
+          }
           
-          // --- IMPORTANT ---
-          // This is where you would save the token for future requests
-          // Example: localStorage.setItem('token', data.token);
-          console.log('Login successful, token received:', data.token);
+          // You can still save the token here
+          localStorage.setItem('token', data.token);
           
           setSubmitMessage(''); 
-          setShowModal(true); // Show the success modal
+          setShowModal(true); // Show success modal
           
         } else {
-          // Server returned an error (e.g., 400, 401)
-          const errorData = await response.json();
-          // Set error message based on your backend's response format
-          setSubmitMessage(`🚫 ${errorData.message || 'Invalid email or password.'}`);
-          setFormData({ ...formData, password: '' }); // Clear password field on failure
+          setSubmitMessage(`🚫 ${data.message || 'Invalid email or password.'}`);
+          setFormData({ ...formData, password: '' });
         }
       } catch (error) {
-        // Network errors (e.g., server not running, CORS issues)
         console.error('Login Fetch Error:', error);
         setSubmitMessage('⚠️ Could not connect to the server. Check network or CORS settings.');
       } finally {
@@ -104,19 +97,18 @@ const LoginForm = () => {
     }
   };
 
-  // Redirect logic (Simulated redirection for Canvas)
   useEffect(() => {
     if (showModal) {
       const timer = setTimeout(() => {
-        window.location.href = '/'; // Redirect to home page
+        // 3. FIX: No hard redirect. Just close the modal.
+        // App.jsx's onLogin function already navigated to '/'.
         setShowModal(false); 
-      }, 2000); // Wait 2 seconds before "redirecting"
+      }, 2000); 
 
       return () => clearTimeout(timer);
     }
   }, [showModal]);
 
-  // Styling helpers
   const baseInputClasses = "w-full p-3 pl-10 border border-gray-300 rounded-lg outline-none transition duration-200 focus:ring-2 focus:ring-green-400 focus:border-green-400";
   const errorInputClasses = "border-red-500 focus:ring-red-400 focus:border-red-500";
   const labelClasses = "block text-sm font-semibold text-gray-700 mb-1";
@@ -124,14 +116,12 @@ const LoginForm = () => {
 
   return (
     <>
-      {/* Using max-w-xl to match the signup form's width */}
       <div className="w-full max-w-lg md:max-w-xl bg-white p-8 md:p-12 shadow-2xl rounded-2xl">
         <h2 className="text-3xl font-normal text-center text-gray-800 mb-8">
           Login
         </h2>
         <form onSubmit={handleSubmit}>
           
-          {/* Email Field */}
           <div className="mb-6">
             <label htmlFor="email" className={labelClasses}>
               Email
@@ -152,7 +142,6 @@ const LoginForm = () => {
             {errors.email && <p className={errorTextClasses}>{errors.email}</p>}
           </div>
 
-          {/* Password Field */}
           <div className="mb-2">
             <label htmlFor="password" className={labelClasses}>
               Password
@@ -173,14 +162,12 @@ const LoginForm = () => {
             {errors.password && <p className={errorTextClasses}>{errors.password}</p>}
           </div>
 
-          {/* Forgot Password Link (as an <a> tag) */}
           <div className="flex justify-end mb-8">
-            <a href="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition duration-150">
+            <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition duration-150">
               Forgot Password?
-            </a>
+            </Link>
           </div>
 
-          {/* Submission Button */}
           <div className='text-center'>
             <button
               type="submit"
@@ -201,31 +188,28 @@ const LoginForm = () => {
             </button>
           </div>
           
-          {/* Error Message */}
           {submitMessage && (
             <p className="text-center font-medium text-sm mt-4 text-red-600 flex items-center justify-center">
               {submitMessage}
             </p>
           )}
 
-          {/* Sign Up Link (as an <a> tag) */}
           <div className='text-center mt-6'>
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition duration-150">
+              <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition duration-150">
                 Sign Up
-              </a>
+              </Link>
             </p>
           </div>
         </form>
       </div>
 
-      {/* Success Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
           <div 
             className="bg-white p-8 rounded-xl shadow-2xl text-center max-w-xs w-full transform transition-all duration-300 scale-100"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-center mb-4">
               <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

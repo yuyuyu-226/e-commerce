@@ -1,51 +1,17 @@
 import Product from "../models/Product.js";
 
-// Admin CRUD operations
-// POST add a new product
-export const addProduct = async (req, res) => {
-  try {
-    const newProduct = await Product.create(req.body);
-    res.status(201).json(newProduct);
-  } catch (error) {
-    console.error("Error adding product:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+export const adminGetAllProducts = (req, res) => {
+  res.json({ message: "adminGetAllProducts route ready" });
 };
-// PUT edit a product
-export const editProduct = async (req, res) => {
-  try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
 
-    if (!updated) return res.status(404).json({ error: "Product not found" });
-
-    res.json(updated);
-  } catch (error) {
-    console.error("Error editing product:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+export const addProduct = (req, res) => {
+  res.json({ message: "addProduct route ready" });
 };
-// DELETE a product
-export const deleteProduct = async (req, res) => {
-  try {
-    const deleted = await Product.findByIdAndDelete(req.params.id);
 
-    if (!deleted) return res.status(404).json({ error: "Product not found" });
-
-    res.json({ message: "Product deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting product:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+export const editProduct = (req, res) => {
+  res.json({ message: "editProduct route ready" });
 };
-// GET all products for admin
-export const adminGetAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find().sort({ createdAt: -1 });
-    res.json(products);
-  } catch (error) {
-    console.error("Error fetching admin products:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+
+export const deleteProduct = (req, res) => {
+  res.json({ message: "deleteProduct route ready" });
 };
