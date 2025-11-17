@@ -6,8 +6,9 @@
 | CO-02        | Verify user can update quantity            | Change item quantity                 | Cart total updates accordingly                           |    Complete    |    Partial    |     Quantity can be updated on order form  |
 | CO-03        | Verify removal of product                  | Click “Remove” icon                  | Item is removed and total updates                        |    Complete    |    Fail    |    Missing  Cart functionality |
 | CO-04        | Verify shipping details form validation    | Leave required fields empty → Submit | Validation messages appear                               |    Complete    |    Pass    |    Order cannot be placed without shipping address as expected   |
-| CO-05        | Verify successful order placement          | Fill all fields → Confirm order      | Order success page displayed with order number           |    Complete    |    Fail    |    "Access token required" error   |
+| CO-05        | Verify successful order placement          | Fill all fields → Confirm order      | Order success page displayed with order number           |    Complete    |    Partial    |    Order success is displayed as expected but without order number   |
 | CO-06        | Verify payment gateway redirection         | Choose payment method → Pay          | Redirects to correct payment page                        |    Complete    |    Partial    |    Mockup Payment   |
 | CO-07        | Verify email confirmation sent             | Complete purchase                    | Confirmation email received                              |     Complete   |     Fail   |    Not implemented   |
 
 **Last Updated:** November 18, 2025
+
