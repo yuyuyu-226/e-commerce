@@ -1,15 +1,20 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react'; // 1. Import useContext
 import { useParams, useNavigate } from 'react-router-dom'; 
 import { ShoppingCart, Loader, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import OrderConfirmationModal from '../components/OrderConfirmationModal.jsx';
 import AuthRedirectModal from '../components/AuthRedirectModal.jsx'; 
-import { FastAverageColor } from "fast-average-color"; // Assumes package is installed
+import { FastAverageColor } from "fast-average-color"; 
+import { AuthContext } from '../components/AuthContext.jsx'; // 2. Import AuthContext
 
 const API_BASE_URL = 'http://localhost:5000';
 
-// 🌟 FIX: Accept BOTH isLoggedIn AND user from props
-const ProductDetails = ({ isLoggedIn, user }) => { 
+// 3. Remove { isLoggedIn, user } from props. We don't need them anymore.
+const ProductDetails = () => { 
     const navigate = useNavigate();
+    
+    // 4. Consume the Context directly. This is the "Source of Truth"
+    const { isLoggedIn, user } = useContext(AuthContext);
+
     const fac = useMemo(() => new FastAverageColor(), []);
     
     const { id } = useParams(); 
@@ -35,8 +40,8 @@ const ProductDetails = ({ isLoggedIn, user }) => {
                 quantity, 
                 address, 
                 totalAmount,
-                // Pass the user object for use in Checkout.jsx
-                userId: user.id || 'mockUserId' 
+                // Use the user ID from context (handle potential undefined safely)
+                userId: user?.id || user?._id || 'mockUserId' 
             } 
         });
     };
@@ -45,7 +50,7 @@ const ProductDetails = ({ isLoggedIn, user }) => {
     const handleOrderClick = () => {
         if (product.stock === 0) return;
 
-        // 🌟 CHECK: Use the isLoggedIn prop directly, which is guaranteed to be up-to-date from App.jsx
+        // Now uses the global context variable, which is accurate
         if (isLoggedIn) {
             setIsModalOpen(true);
             setIsAuthModalOpen(false);

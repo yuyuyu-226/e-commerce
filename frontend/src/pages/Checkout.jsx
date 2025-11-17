@@ -1,43 +1,23 @@
 import React, { useState, useContext } from 'react'; // 1. Import useContext
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Loader, AlertTriangle, CheckCircle } from 'lucide-react';
-// 2. Import the context
-import { AuthContext } from '../components/AuthContext.jsx'; 
+import { ShoppingBag, CreditCard, Loader, AlertTriangle, CheckCircle } from 'lucide-react';
+import { AuthContext } from '../components/AuthContext.jsx'; // 2. Import AuthContext
+
+import GcashLogo from '../assets/gcash.svg'; 
+import CreditCardLogo from '../assets/credit-card.svg';
 
 const API_BASE_URL = 'http://localhost:5000';
-
-// --- 3. Inline SVG Logos (Replaces broken imports) ---
-const GcashLogo = () => (
-  <svg className="w-10 h-10 mr-4" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M0 130V30C0 13.4315 13.4315 0 30 0H130C146.569 0 160 13.4315 160 30V130C160 146.569 146.569 160 130 160H30C13.4315 160 0 146.569 0 130Z" fill="#0057E5"/>
-    <path fillRule="evenodd" clipRule="evenodd" d="M107.828 75.832L83.055 51.059L78.14 55.973L98.01 75.832H61.99V84.168H98.01L78.14 104.027L83.055 108.941L107.828 84.168V75.832Z" fill="white"/>
-    <path d="M48 48H32V64H48V48Z" fill="white"/>
-    <path d="M48 96H32V112H48V96Z" fill="white"/>
-    <path d="M128 48H112V64H128V48Z" fill="white"/>
-  </svg>
-);
-
-const CreditCardLogo = () => (
-  <svg className="w-10 h-auto mr-4" viewBox="0 0 32 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="32" height="20" rx="3" fill="#4A4A4A"/>
-    <rect y="4" width="32" height="4" fill="#979797"/>
-    <rect x="20" y="12" width="8" height="2" fill="white"/>
-  </svg>
-);
-// --- End SVG Logos ---
-
 
 const Checkout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     
-    // --- 4. GET THE USER FROM CONTEXT ---
+    // 3. Get the logged-in user from context
     const { user } = useContext(AuthContext);
 
-    // Get the order data passed from the ProductDetails page
     const { product, quantity, address, totalAmount } = location.state || {};
 
-    const [paymentMethod, setPaymentMethod] = useState(null); // 'gcash' or 'creditcard'
+    const [paymentMethod, setPaymentMethod] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -47,49 +27,55 @@ const Checkout = () => {
             return;
         }
 
-        // --- 5. CHECK FOR REAL USER ID ---
-        if (!user || !user._id) { // Use _id (or id) from your token
-            setError("User session error. Please log in again.");
-            return;
-        }
+        setIsLoading(true);
+        setError(null);
         
-        // --- 6. GET TOKEN FOR API CALL ---
+        // 4. Get the token from storage
         const token = localStorage.getItem('token');
+
         if (!token) {
-            setError("Authentication token not found. Please log in again.");
+            setError("You must be logged in to place an order.");
+            setIsLoading(false);
             return;
         }
 
-        setIsLoading(true);
-        setError(null);
+        // 5. Use real user ID (fallback to _id if id is missing)
+        const realUserId = user?.id || user?._id; 
+
+        if (!realUserId) {
+            setError("User session invalid. Please login again.");
+            setIsLoading(false);
+            return;
+        }
 
         try {
             const orderData = {
-                // --- 7. USE THE REAL USER ID ---
-                userId: user._id, 
+                userId: realUserId, // Use the real ID
                 productId: product._id,
                 quantity: quantity,
                 address: address,
                 totalAmount: totalAmount,
-                paymentMethod: paymentMethod
             };
 
             const response = await fetch(`${API_BASE_URL}/orders`, {
                 method: 'POST',
+                // 6. ADD THE AUTHORIZATION HEADER HERE
                 headers: { 
                     'Content-Type': 'application/json',
-                    // --- 8. ADD AUTHORIZATION HEADER ---
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}` 
                 },
                 body: JSON.stringify(orderData),
             });
 
             if (!response.ok) {
+                // If token is expired/invalid, the backend might return 401 or 403
+                if (response.status === 401 || response.status === 403) {
+                    throw new Error("Session expired. Please login again.");
+                }
                 const errorData = await response.json();
                 throw new Error(errorData.error || "Failed to create order.");
             }
 
-            // SUCCESS!
             alert("Order placed successfully! Thank you for your purchase.");
             navigate('/products'); 
 
@@ -101,9 +87,9 @@ const Checkout = () => {
         }
     };
 
-    // If the user lands here directly without order data, redirect them
+    // ... (Rest of your render code remains exactly the same)
+    
     if (!product) {
-        // You can make this a more elegant "Empty Cart" page
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-light-accent)' }}>
                 <div className="text-center">
@@ -116,7 +102,6 @@ const Checkout = () => {
         );
     }
 
-    // Helper to style the selected payment option
     const getPaymentOptionClass = (method) => {
         return `flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
             paymentMethod === method
@@ -133,7 +118,7 @@ const Checkout = () => {
                     Final Checkout
                 </h1>
 
-                {/* --- 1. Order Summary --- */}
+                {/* Order Summary */}
                 <div className="mb-6 border-b pb-6">
                     <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--color-primary-dark)' }}>Order Summary</h2>
                     <div className="flex justify-between items-center mb-2">
@@ -150,7 +135,7 @@ const Checkout = () => {
                     </div>
                 </div>
 
-                {/* --- 2. Shipping Details --- */}
+                {/* Shipping Details */}
                 <div className="mb-6 border-b pb-6">
                     <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--color-primary-dark)' }}>Shipping To</h2>
                     <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
@@ -158,23 +143,21 @@ const Checkout = () => {
                     </p>
                 </div>
 
-                {/* --- 3. Payment Method --- */}
+                {/* Payment Method */}
                 <div className="mb-8">
                     <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--color-primary-dark)' }}>Payment Method</h2>
                     <div className="space-y-4">
-                        {/* GCash Option */}
                         <div className={getPaymentOptionClass('gcash')} onClick={() => setPaymentMethod('gcash')}>
                             <div className="flex items-center">
-                                <GcashLogo />
+                                <img src={GcashLogo} alt="GCash" className="w-10 h-10 mr-4 object-contain"/>
                                 <span className="font-semibold">Pay with GCash</span>
                             </div>
                             {paymentMethod === 'gcash' && <CheckCircle className="w-6 h-6" style={{ color: 'var(--color-primary-accent)' }} />}
                         </div>
 
-                        {/* Credit Card Option */}
                         <div className={getPaymentOptionClass('creditcard')} onClick={() => setPaymentMethod('creditcard')}>
                             <div className="flex items-center">
-                                <CreditCardLogo />
+                                <img src={CreditCardLogo} alt="Visa" className="w-10 h-6 mr-2 object-contain"/>
                                 <span className="font-semibold">Pay with Credit/Debit Card</span>
                             </div>
                             {paymentMethod === 'creditcard' && <CheckCircle className="w-6 h-6" style={{ color: 'var(--color-primary-accent)' }} />}
@@ -182,7 +165,7 @@ const Checkout = () => {
                     </div>
                 </div>
                 
-                {/* --- 4. Error Display --- */}
+                {/* Error Display */}
                 {error && (
                     <div className="text-center p-3 bg-red-100 rounded-lg mb-4">
                         <AlertTriangle className="w-5 h-5 mx-auto mb-2 text-red-600" />
@@ -190,7 +173,7 @@ const Checkout = () => {
                     </div>
                 )}
 
-                {/* --- 5. Place Order Button --- */}
+                {/* Place Order Button */}
                 <button
                     onClick={handleSubmitOrder}
                     disabled={!paymentMethod || isLoading}
