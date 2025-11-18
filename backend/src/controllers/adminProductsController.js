@@ -5,6 +5,7 @@ import Product from "../models/Product.js";
 export const addProduct = async (req, res) => {
   try {
     const newProduct = await Product.create(req.body);
+    console.log("[Admin CRUD] Added product:", newProduct); // <-- log
     res.status(201).json(newProduct);
   } catch (error) {
     console.error("Error adding product:", error);
@@ -18,8 +19,15 @@ export const editProduct = async (req, res) => {
       new: true,
     });
 
-    if (!updated) return res.status(404).json({ error: "Product not found" });
+    if (!updated) {
+      console.log(
+        "[Admin CRUD] Edit failed, product not found:",
+        req.params.id
+      ); // <-- log
+      return res.status(404).json({ error: "Product not found" });
+    }
 
+    console.log("[Admin CRUD] Updated product:", updated); // <-- log
     res.json(updated);
   } catch (error) {
     console.error("Error editing product:", error);
@@ -31,8 +39,15 @@ export const deleteProduct = async (req, res) => {
   try {
     const deleted = await Product.findByIdAndDelete(req.params.id);
 
-    if (!deleted) return res.status(404).json({ error: "Product not found" });
+    if (!deleted) {
+      console.log(
+        "[Admin CRUD] Delete failed, product not found:",
+        req.params.id
+      ); // <-- log
+      return res.status(404).json({ error: "Product not found" });
+    }
 
+    console.log("[Admin CRUD] Deleted product:", deleted); // <-- log
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -43,6 +58,7 @@ export const deleteProduct = async (req, res) => {
 export const adminGetAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
+    console.log("[Admin CRUD] Fetched all products, count:", products.length); // <-- log
     res.json(products);
   } catch (error) {
     console.error("Error fetching admin products:", error);
