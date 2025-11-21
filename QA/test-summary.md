@@ -11,7 +11,20 @@
 
 **Summary:**
 The first week was the setting up phase, the time was used to familiarize with the repository. Planning and structuring for the QA was finished within the timeframe.
+---
 
+## Week 2
+
+**Actions:**
+- Started adm-test
+- Completed auth-test
+- Started co-test
+- Completed pdp-test
+- Completed plp-test
+- Completed ui-test
+
+**Summary:**
+Started and completed the majority of test cases
 ---
 
 ## Auth Test
