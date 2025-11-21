@@ -4,6 +4,7 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 
 // Components
 import NavBar from './components/NavBar.jsx';
+import Footer from './components/Footer.jsx';
 
 // Pages
 import Home from './pages/Home.jsx';
@@ -75,6 +76,7 @@ const App = () => {
           
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 };
