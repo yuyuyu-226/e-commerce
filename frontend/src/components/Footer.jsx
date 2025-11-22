@@ -18,7 +18,7 @@ const Footer = () => {
             
             {/* Copyright Text */}
             <div className="text-gray-400 text-sm font-medium mt-auto">
-              &copy; 2025 Fabricate & Style. All rights reserved.
+              &copy; 2025 Manufacture and Produce. All rights reserved.
             </div>
           </div>
 
@@ -49,8 +49,8 @@ const Footer = () => {
             <h3 className="text-base font-bold mb-6 text-white uppercase tracking-wider">Contact Us</h3>
             <div className="space-y-3 text-sm text-gray-300 font-medium mb-6">
               <p>123 Industrial Way, Textile City, TX 12345</p>
-              <p>Email: <a href="mailto:info@fabricateandstyle.com" className="hover:text-white">info@fabricateandstyle.com</a></p>
-              <p>Phone: <a href="tel:1234567890" className="hover:text-white">(123) 456-7890</a></p>
+              <p>Email: <a href="mailto:info@fabricateandstyle.com" className="hover:text-white">info@manufactureandproduce.ph</a></p>
+              <p>Phone: <a href="tel:+63281234567" className="hover:text-white">+63 (2) 8123 4567</a></p>
             </div>
 
             {/* Social Icons */}
