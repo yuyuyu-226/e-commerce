@@ -7,20 +7,23 @@ export const getProducts = async (req, res) => {
     const { category, sort, query } = req.query;
     const filter = {};
 
-    // Validate category as string
+    // Validate category
     if (category && typeof category === "string") {
       filter.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
 
-    //For sorting by price
+    // Sorting validation
+    const validSortOptions = ["price_asc", "price_desc"];
     let sortOption = {};
-    if (sort === "price_asc") {
-      sortOption.price = 1; // Ascending
-    } else if (sort === "price_desc") {
-      sortOption.price = -1; // Descending
+
+    if (validSortOptions.includes(sort)) {
+      sortOption.price = sort === "price_asc" ? 1 : -1;
+    } else {
+      // Important for NO FLICKER
+      sortOption = { name: 1 };
     }
 
-    // Validate query as string
+    // Validate search query
     if (query && typeof query === "string" && query.trim() !== "") {
       filter.$or = [
         { name: { $regex: query, $options: "i" } },
