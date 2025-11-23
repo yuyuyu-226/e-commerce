@@ -105,6 +105,10 @@ const ProductPage = () => {
             setLoading(true);
             setError(null);
             try {
+                // --- 🌟 ADDED DELAY HERE ---
+                // Wait for 1000ms (1 second) before proceeding with the fetch
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
                 const params = new URLSearchParams();
                 if (selectedCategory) params.append('category', selectedCategory);
                 if (sortBy) params.append('sort', sortBy);
