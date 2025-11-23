@@ -1,13 +1,14 @@
 import Product from "../models/Product.js";
+import mongoose from "mongoose";
 
 // GET /products - fetch all products
 export const getProducts = async (req, res) => {
   try {
-    //For fitlering by category
     const { category, sort, query } = req.query;
     const filter = {};
 
-    if (category) {
+    // Validate category as string
+    if (category && typeof category === "string") {
       filter.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
 
@@ -19,17 +20,15 @@ export const getProducts = async (req, res) => {
       sortOption.price = -1; // Descending
     }
 
-    //for searching by name or description
-    if (query && query.trim() !== "") {
+    // Validate query as string
+    if (query && typeof query === "string" && query.trim() !== "") {
       filter.$or = [
         { name: { $regex: query, $options: "i" } },
         { description: { $regex: query, $options: "i" } },
       ];
     }
 
-    //fetch products from DB based on filter and sort options
     const products = await Product.find(filter).sort(sortOption);
-
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -37,28 +36,30 @@ export const getProducts = async (req, res) => {
   }
 };
 
+// GET /categories - fetch all active categories
 export const getCategories = async (req, res) => {
   try {
-    // Fetch distinct categories from active products
     const categories = await Product.distinct("category", { status: "active" });
-
-    //Filter out any null or empty strings, then sort alphabetically
     const cleanCategories = categories
       .filter((c) => c && c.trim() !== "")
       .sort();
-
-    res.json(categories);
+    res.json(cleanCategories);
   } catch (error) {
     console.error("Error fetching unique categories:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
+// GET /products/:id - fetch product by ID
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    //fetch product by ID
+    // Validate product ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid product ID" });
+    }
+
     const product = await Product.findById(id);
 
     if (!product) {
