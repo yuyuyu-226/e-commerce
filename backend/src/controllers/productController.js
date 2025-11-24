@@ -60,10 +60,16 @@ export const getProductById = async (req, res) => {
 
     // Validate product ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid product ID" });
+      return res
+        .status(400)
+        .json({
+          error: "Invalid product ID",
+          detail: "Product ID must be a valid MongoDB ObjectId",
+        }); //400 Bad Request if product ID is invalid
     }
 
-    const product = await Product.findById(id);
+    //Added lean() for better performance as we are not modifying the product(VERIFIED: /getProductById/:id endpoint returns correct product info)
+    const product = await Product.findById(id).lean();
 
     if (!product) {
       return res.status(404).json({ error: "Product not found" });

@@ -34,7 +34,10 @@ export const createOrder = async (req, res) => {
 
     // Validate product exists
     const product = await Product.findById(productId);
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    if (!product)
+      return res
+        .status(404)
+        .json({ error: "Product not found", idRequestesd: productId }); //404 Not Found if product does not exist
 
     // Check stock
     if (product.stock < quantity) {
@@ -58,7 +61,16 @@ export const createOrder = async (req, res) => {
 
     // Reduce stock
     product.stock -= quantity;
-    await product.save();
+
+    //try-catch for saving product stock update
+    try {
+      await product.save();
+    } catch (saveError) {
+      console.error("Error updating product stock:", saveError);
+      return res
+        .status(500)
+        .json({ error: "Server error while updating stock" });
+    }
 
     res.status(201).json(order);
   } catch (error) {
