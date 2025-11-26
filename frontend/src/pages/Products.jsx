@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Image, ShoppingCart, Loader, AlertTriangle, Search, Filter } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Image, ShoppingCart, Loader, AlertTriangle, Search, Filter, ChevronDown, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Base URL for your Express backend
@@ -90,6 +90,10 @@ const ProductPage = () => {
     const [searchQuery, setSearchQuery] = useState(''); 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // State for custom dropdown
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     // Helper function to extract and clean categories
     const extractCategories = (data) => {
@@ -143,6 +147,19 @@ const ProductPage = () => {
 
         fetchProducts();
     }, [selectedCategory, sortBy, searchQuery, categories.length]); 
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [dropdownRef]);
 
     const renderContent = () => {
         if (loading) {
@@ -223,27 +240,57 @@ const ProductPage = () => {
                     </div>
                 </div>
                 
-                {/* Category Dropdown */}
-                <div className="mb-6">
-                    <label htmlFor="categoryFilter" className="block text-sm font-semibold mb-2 text-gray-700">Category</label>
+                {/* Custom Animated Category Dropdown */}
+                <div className="mb-6" ref={dropdownRef}>
+                    <label className="block text-sm font-semibold mb-2 text-gray-700">Category</label>
                     <div className="relative">
-                        <select
-                            id="categoryFilter"
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className={`${inputTransitionClass} appearance-none cursor-pointer bg-white`}
+                        {/* Trigger Button */}
+                        <button
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className={`w-full p-3 bg-white border rounded-xl shadow-sm flex justify-between items-center text-left transition-all duration-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-accent)] ${isDropdownOpen ? 'ring-2 ring-[var(--color-primary-accent)] border-transparent' : ''}`}
                             style={{ borderColor: 'var(--color-primary-dark)' }}
                         >
-                            <option value="">All Categories</option>
-                            {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {category}
-                                </option>
-                            ))}
-                        </select>
-                        {/* Custom Arrow for better styling */}
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            <span className={`${!selectedCategory ? 'text-gray-500' : 'text-gray-800 font-medium'}`}>
+                                {selectedCategory || "All Categories"}
+                            </span>
+                            <ChevronDown 
+                                className={`w-5 h-5 text-gray-500 transition-transform duration-300 ease-in-out ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                            />
+                        </button>
+
+                        {/* Dropdown Menu with smooth transition */}
+                        <div 
+                            className={`absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-in-out origin-top transform ${
+                                isDropdownOpen 
+                                    ? 'opacity-100 scale-y-100 max-h-60' 
+                                    : 'opacity-0 scale-y-95 max-h-0 pointer-events-none'
+                            }`}
+                        >
+                            <div className="overflow-y-auto max-h-60">
+                                <button
+                                    onClick={() => {
+                                        setSelectedCategory('');
+                                        setIsDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-4 py-3 text-left text-sm hover:bg-blue-50 transition-colors duration-150 flex items-center justify-between ${selectedCategory === '' ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700'}`}
+                                >
+                                    All Categories
+                                    {selectedCategory === '' && <span className="w-2 h-2 rounded-full bg-blue-600"></span>}
+                                </button>
+                                {categories.map((category) => (
+                                    <button
+                                        key={category}
+                                        onClick={() => {
+                                            setSelectedCategory(category);
+                                            setIsDropdownOpen(false);
+                                        }}
+                                        className={`w-full px-4 py-3 text-left text-sm hover:bg-blue-50 transition-colors duration-150 flex items-center justify-between border-t border-gray-50 ${selectedCategory === category ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700'}`}
+                                    >
+                                        {category}
+                                        {selectedCategory === category && <span className="w-2 h-2 rounded-full bg-blue-600"></span>}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
