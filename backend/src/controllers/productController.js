@@ -81,3 +81,38 @@ export const getProductById = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+// GET /products/search - search products by query, category, optional sort
+export const searchProducts = async (req, res) => {
+  try {
+    const { query, category, sort } = req.query;
+    const filter = {};
+
+    // Category filter
+    if (category && typeof category === "string" && category.trim() !== "") {
+      filter.category = { $regex: new RegExp(`^${category.trim()}$`, "i") };
+    }
+
+    // Search query filter
+    if (query && typeof query === "string" && query.trim() !== "") {
+      filter.$or = [
+        { name: { $regex: query.trim(), $options: "i" } },
+        { description: { $regex: query.trim(), $options: "i" } },
+      ];
+    }
+
+    // Sorting
+    const validSortOptions = ["price_asc", "price_desc"];
+    let sortOption = { name: 1 }; // default sort by name ascending
+    if (validSortOptions.includes(sort)) {
+      sortOption.price = sort === "price_asc" ? 1 : -1;
+    }
+
+    // Fetch products
+    const products = await Product.find(filter).sort(sortOption);
+    res.json(products);
+  } catch (error) {
+    console.error("Error searching products:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
