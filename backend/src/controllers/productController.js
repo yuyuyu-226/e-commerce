@@ -7,20 +7,26 @@ export const getProducts = async (req, res) => {
     const { category, sort, query } = req.query;
     const filter = {};
 
-    // Validate category as string
+    // Validate category (Ensured /products endpoint works with category filter)
     if (category && typeof category === "string") {
-      filter.category = { $regex: new RegExp(`^${category}$`, "i") };
+      const cleanCategory = category.trim(); // NEW: trim whitespace
+      if (cleanCategory !== "") {
+        filter.category = { $regex: new RegExp(`^${cleanCategory}$`, "i") };
+      }
     }
 
-    //For sorting by price
+    // Sorting validation
+    const validSortOptions = ["price_asc", "price_desc"];
     let sortOption = {};
-    if (sort === "price_asc") {
-      sortOption.price = 1; // Ascending
-    } else if (sort === "price_desc") {
-      sortOption.price = -1; // Descending
+
+    if (validSortOptions.includes(sort)) {
+      sortOption.price = sort === "price_asc" ? 1 : -1;
+    } else {
+      // Important for NO FLICKER
+      sortOption = { name: 1 };
     }
 
-    // Validate query as string
+    // Validate search query
     if (query && typeof query === "string" && query.trim() !== "") {
       filter.$or = [
         { name: { $regex: query, $options: "i" } },
@@ -57,10 +63,14 @@ export const getProductById = async (req, res) => {
 
     // Validate product ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid product ID" });
+      return res.status(400).json({
+        error: "Invalid product ID",
+        detail: "Product ID must be a valid MongoDB ObjectId",
+      }); //400 Bad Request if product ID is invalid
     }
 
-    const product = await Product.findById(id);
+    //Added lean() for better performance as we are not modifying the product(VERIFIED: /getProductById/:id endpoint returns correct product info)
+    const product = await Product.findById(id).lean();
 
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
