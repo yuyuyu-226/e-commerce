@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Image, ShoppingCart, Loader, AlertTriangle, Search, Filter, ChevronDown, X } from 'lucide-react';
+import { Image, ShoppingCart, AlertTriangle, Search, Filter, ChevronDown, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ProductCardSkeleton from '../components/ProductCardSkeleton.jsx'; // Import the skeleton
 
 // Base URL for your Express backend
 const API_BASE_URL = 'http://localhost:5000';
@@ -109,8 +110,7 @@ const ProductPage = () => {
             setLoading(true);
             setError(null);
             try {
-                // --- 🌟 ADDED DELAY HERE ---
-                // Wait for 1000ms (1 second) before proceeding with the fetch
+                // Wait for 1000ms (1 second) before proceeding with the fetch so skeleton is visible
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const params = new URLSearchParams();
@@ -162,11 +162,14 @@ const ProductPage = () => {
     }, [dropdownRef]);
 
     const renderContent = () => {
+        // --- SKELETON LOADING STATE ---
         if (loading) {
             return (
-                <div className="flex flex-col justify-center items-center h-96 animate-pulse">
-                    <Loader className="w-12 h-12 animate-spin mb-4" style={{ color: 'var(--color-primary-accent)' }} />
-                    <p className="text-xl font-medium" style={{ color: 'var(--color-primary-dark)' }}>Loading products...</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 pb-12">
+                    {/* Render 6 skeleton cards as placeholders */}
+                    {[...Array(6)].map((_, index) => (
+                        <ProductCardSkeleton key={index} />
+                    ))}
                 </div>
             );
         }
