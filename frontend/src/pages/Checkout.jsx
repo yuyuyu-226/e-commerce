@@ -175,8 +175,13 @@ const Checkout = () => {
 
                 {/* Place Order Button */}
                 <button
-                    onClick={handleSubmitOrder}
-                    disabled={!paymentMethod || isLoading}
+                    onClick={() => {
+                        if (!paymentMethod) {
+                            setError("Please select a payment method before placing your order.");
+                            return;
+                        }
+                        if (!isLoading) handleSubmitOrder();
+                    }}
                     className={`w-full py-4 rounded-xl text-lg font-bold text-white transition-all duration-300 shadow-lg flex items-center justify-center ${
                         !paymentMethod || isLoading
                             ? 'opacity-50 cursor-not-allowed'
