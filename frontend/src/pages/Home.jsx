@@ -43,7 +43,7 @@ const Home = () => {
                 });
 
                 setCategories(Object.values(unique).slice(0, 3));
-            } catch (err) {
+            } catch  {
                 setError("Unable to load categories.");
             } finally {
                 setLoading(false);

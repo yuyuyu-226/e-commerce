@@ -286,7 +286,7 @@ const AdminDashboard = () => {
                 setIsAdmin(false);
                 setIsLoading(false);
             }
-        } catch (e) {
+        } catch  {
             setError("Invalid token. Redirecting to login.");
             localStorage.removeItem('token');
             setTimeout(() => navigate('/login'), 1500);
