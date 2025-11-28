@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Plus, Edit, Trash2, Search, Loader2, AlertCircle, X, Save, Lock, ImageOff, AlertTriangle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 
-// Base URL for API calls
-const API_BASE_URL = 'http://localhost:5000/admin/products';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// --- Helper Functions ---
+// Manually decode JWT since 'jwt-decode' library is not available
+const parseJwt = (token) => {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch  {
+        return null;
+    }
+};
 
 // --- Reusable Modal Styles ---
-// This ensures consistency across Add, Edit, and Delete modals
 const modalOverlayClass = "fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4";
 const modalContentClass = "bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden transform transition-all scale-100";
 
@@ -48,7 +60,6 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, productName }) =>
 };
 
 // --- Add/Edit Form Component (Reusable) ---
-// We split this out so Add and Edit can share the same form logic
 const ProductForm = ({ initialData, onSubmit, onClose, title, isSaving, saveError }) => {
     const [formData, setFormData] = useState(initialData);
 
@@ -60,7 +71,6 @@ const ProductForm = ({ initialData, onSubmit, onClose, title, isSaving, saveErro
         }));
     };
 
-    // Common input styling
     const inputClass = "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition duration-150";
 
     return (
@@ -219,7 +229,6 @@ const AddProductModal = ({ onClose, onAdd }) => {
 
         try {
             const token = localStorage.getItem('token');
-            // Assuming the endpoint is /add based on standard conventions
             const response = await fetch(`${API_BASE_URL}/add`, { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -278,8 +287,9 @@ const AdminDashboard = () => {
             return;
         }
         try {
-            const decoded = jwtDecode(token);
-            if (decoded.role === 'Admin') {
+            // Using manual parseJwt instead of jwt-decode library
+            const decoded = parseJwt(token);
+            if (decoded && decoded.role === 'Admin') {
                 setIsAdmin(true);
                 fetchProducts(token);
             } else {
@@ -298,6 +308,8 @@ const AdminDashboard = () => {
         setIsLoading(true);
         setError(null);
         try {
+            if (!API_BASE_URL) throw new Error("API URL is not defined in environment variables.");
+
             const response = await fetch(`${API_BASE_URL}/getAllProducts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -331,7 +343,7 @@ const AdminDashboard = () => {
 
             if (response.ok) {
                 setProducts(products.filter(product => product._id !== id));
-                setDeleteModal({ isOpen: false, productId: null, productName: '' }); // Close modal
+                setDeleteModal({ isOpen: false, productId: null, productName: '' });
             } else {
                 console.error("Delete failed");
             }
@@ -426,7 +438,6 @@ const AdminDashboard = () => {
                     <p className="text-gray-600 mt-1">View and manage your store inventory.</p>
                 </div>
                 
-                {/* Changed from Link to Button to trigger Modal */}
                 <button 
                     onClick={() => setIsAddModalOpen(true)}
                     className="mt-4 md:mt-0 flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow-lg hover:bg-green-700 transition transform hover:scale-105"
@@ -490,7 +501,6 @@ const AdminDashboard = () => {
                                             <td className={`p-4 ${stockStatus.weight}`}><span className={`px-2 py-1 text-xs rounded-full ${stockStatus.bg} ${stockStatus.color}`}>{stockStatus.text}</span></td>
                                             <td className="p-4 flex justify-center space-x-4">
                                                 <button onClick={() => setEditingProduct(product)} className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition" title="Edit"><Edit className="w-5 h-5" /></button>
-                                                {/* Update onClick to open modal */}
                                                 <button onClick={() => openDeleteModal(product)} className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition" title="Delete"><Trash2 className="w-5 h-5" /></button>
                                             </td>
                                         </tr>
