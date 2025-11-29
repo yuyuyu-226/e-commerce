@@ -6,7 +6,7 @@ import AuthRedirectModal from '../components/AuthRedirectModal.jsx';
 import { FastAverageColor } from "fast-average-color"; 
 import { AuthContext } from '../components/AuthContext.jsx';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const ProductDetails = () => { 
     const navigate = useNavigate();
@@ -134,7 +134,6 @@ const ProductDetails = () => {
         <div className="min-h-screen p-6 lg:p-12 transition-colors duration-500" style={{ backgroundColor: 'var(--color-light-accent)' }}>
             <div className="max-w-6xl mx-auto bg-white shadow-2xl rounded-3xl p-6 md:p-10 overflow-hidden">
                 
-                {/* Animated Breadcrumbs */}
                 <div className="text-sm mb-8 flex items-center space-x-2" style={{ color: 'var(--color-secondary-highlight)' }}>
                     <Link to="/" className="hover:text-blue-600 hover:underline transition-all duration-200">Home</Link>
                     <span>/</span>
@@ -145,7 +144,6 @@ const ProductDetails = () => {
 
                 <div className="md:flex md:space-x-12">
                     
-                    {/* Left Column: Image */}
                     <div className="md:w-1/2 flex-shrink-0 mb-8 md:mb-0 group perspective-1000">
                         <div 
                             className="relative rounded-2xl overflow-hidden border-4 shadow-inner transition-transform duration-500 ease-out group-hover:scale-[1.02] group-hover:shadow-xl"
@@ -173,7 +171,6 @@ const ProductDetails = () => {
                         </div>
                     </div>
 
-                    {/* Right Column: Details */}
                     <div className="md:w-1/2 pt-2 flex flex-col">
                         
                         <div className="flex-grow">
@@ -185,7 +182,6 @@ const ProductDetails = () => {
                                 {product.description}
                             </p>
 
-                            {/* --- ANIMATED CATEGORY DROPDOWN / ACCORDION --- */}
                             <div className="mb-8 border rounded-xl overflow-hidden border-gray-200">
                                 <button 
                                     onClick={() => setIsSpecsOpen(!isSpecsOpen)}
@@ -199,7 +195,6 @@ const ProductDetails = () => {
                                     />
                                 </button>
                                 
-                                {/* Smooth Height Transition Wrapper */}
                                 <div 
                                     className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${isSpecsOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
                                 >
@@ -236,7 +231,6 @@ const ProductDetails = () => {
                                 </span>
                             </div>
 
-                            {/* --- ANIMATED BUTTON --- */}
                             <button
                                 onClick={handleOrderClick}
                                 disabled={product.stock === 0}
