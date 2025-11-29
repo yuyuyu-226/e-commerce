@@ -6,7 +6,7 @@ import AuthRedirectModal from '../components/AuthRedirectModal.jsx';
 import { FastAverageColor } from "fast-average-color"; 
 import { AuthContext } from '../components/AuthContext.jsx';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL}/product-details`;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const ProductDetails = () => { 
     const navigate = useNavigate();
