@@ -65,7 +65,7 @@ const Login = () => {
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
       try {
-        const url = `${API_BASE_URL}/login`;
+        const url = `${API_BASE_URL}/auth/login`;
         
         const response = await fetch(url, {
           method: 'POST',

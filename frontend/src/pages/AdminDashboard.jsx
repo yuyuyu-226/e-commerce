@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Plus, Edit, Trash2, Search, Loader2, AlertCircle, X, Save, Lock, ImageOff, AlertTriangle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const RAW_BASE_URL = import.meta.env.VITE_API_URL;
+
+const BASE_URL = RAW_BASE_URL ? RAW_BASE_URL.replace(/\/$/, '') : '';
+
+const API_BASE_URL = BASE_URL ? `${BASE_URL}/admin/products` : '';
+
+console.log("Admin Dashboard API URL:", API_BASE_URL);
 
 // --- Helper Functions ---
-// Manually decode JWT since 'jwt-decode' library is not available
 const parseJwt = (token) => {
     try {
         const base64Url = token.split('.')[1];
@@ -171,6 +176,9 @@ const EditProductModal = ({ product, onClose, onSave }) => {
 
         try {
             const token = localStorage.getItem('token');
+            // FIX: Ensure API_BASE_URL is valid before fetching
+            if (!API_BASE_URL) throw new Error("Server URL is missing. Check .env file.");
+
             const response = await fetch(`${API_BASE_URL}/edit/${product._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -229,6 +237,9 @@ const AddProductModal = ({ onClose, onAdd }) => {
 
         try {
             const token = localStorage.getItem('token');
+            // FIX: Ensure API_BASE_URL is valid before fetching
+            if (!API_BASE_URL) throw new Error("Server URL is missing. Check .env file.");
+
             const response = await fetch(`${API_BASE_URL}/add`, { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -308,7 +319,8 @@ const AdminDashboard = () => {
         setIsLoading(true);
         setError(null);
         try {
-            if (!API_BASE_URL) throw new Error("API URL is not defined in environment variables.");
+            // FIX: This check now works correctly because API_BASE_URL is empty string if env is missing
+            if (!API_BASE_URL) throw new Error("VITE_API_URL is missing in environment variables.");
 
             const response = await fetch(`${API_BASE_URL}/getAllProducts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
