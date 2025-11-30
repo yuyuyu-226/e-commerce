@@ -18,7 +18,7 @@ const app = express();
 connectDB();
 
 const allowedOrigins = [
-  "https://e-commerce-teal-iota-85.vercel.app/",
+  "https://e-commerce-teal-iota-85.vercel.app",
   "http://localhost:5173",
 ];
 
