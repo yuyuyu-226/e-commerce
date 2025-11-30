@@ -1,10 +1,19 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.jsx";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import App from './App.jsx';
+import { AuthProvider } from './components/AuthContext.jsx';
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+// Import your global CSS file if you have one
+import './index.css'; 
+
+// --- The core rendering logic ---
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Router>
+      <AuthProvider>
+      <App />
+      </AuthProvider>
+    </Router>
+  </React.StrictMode>,
 );
