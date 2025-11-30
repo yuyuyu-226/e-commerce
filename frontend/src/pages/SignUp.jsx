@@ -115,7 +115,7 @@ const SignUp = () => {
   useEffect(() => {
     if (shouldRedirect) {
       const timer = setTimeout(() => {
-        navigate('/auth/login'); 
+        navigate('/login'); 
       }, 1500); 
       return () => clearTimeout(timer);
     }
