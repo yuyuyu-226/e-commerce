@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, CheckCircle, AlertTriangle, Loader, UserPlus } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -8,6 +9,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 
 const SignUp = () => {
+  const navigate = useNavigate();
   // --- Form Logic ---
   const [formData, setFormData] = useState({
     firstName: '', 
@@ -113,11 +115,11 @@ const SignUp = () => {
   useEffect(() => {
     if (shouldRedirect) {
       const timer = setTimeout(() => {
-        window.location.href = '/login'; 
+        navigate('/auth/login'); 
       }, 1500); 
       return () => clearTimeout(timer);
     }
-  }, [shouldRedirect]);
+  }, [shouldRedirect, navigate]);
 
   // Helper for input classes
   const inputClass = (fieldName, hasIcon = true) => 
